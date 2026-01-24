@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wonder Gallery</title>
+  <meta name="description" content="Wonder Gallery — packaged, piece, and custom wallboards. Inspiring visuals, responsive UI and dynamic hero." />
+  <link rel="shortcut icon" href="https://copilot.microsoft.com/th/id/BCO.457b528e-16b4-40fc-9359-3c1439449a5c.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;900&family=Material+Symbols+Rounded" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f5fbff;
+      --nav-a:#0077b6;
+      --accent:#00bfff;
+      --accent-2:#2a6dd1;
+      --muted:#e6f7ff;
+      --card-shadow: 0 8px 28px rgba(12, 46, 98, 0.3);
+      --glass: rgba(255,255,255,0.6);
+      --radius:14px;
+      --btn-bg: rgba(255,255,255,0.08);
+    }
+
+    /* Base */
+    * { box-sizing: border-box; }
+    html,body { height:100%; }
+    body{
+      margin:0;
+      font-family: "Poppins", Arial, sans-serif;
+      background:var(--bg);
+      color:#07233a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      -webkit-tap-highlight-color: transparent;
+      line-height:1.35;
+    }
+
+    /* NAV */
+    .site-header{
+      position:sticky; top:0; z-index:50;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:10px 16px;
+      background: linear-gradient(90deg,var(--accent),#0077b6);
+      box-shadow:0 6px 20px rgba(0,119,182,0.12);
+      border-bottom-left-radius:12px; border-bottom-right-radius:12px;
+    }
+    .brand { color:#fff; font-weight:900; font-size:1.05rem; letter-spacing:.4px; display:flex; align-items:center; gap:.6rem }
+    .brand img{ width:36px; height:36px; border-radius:8px; object-fit:cover }
+
+    .nav-actions{ display:flex; gap:8px; align-items:center }
+
+    /* Buttons */
+    .btn, button{ border:0; background:transparent; color:inherit; cursor:pointer; padding:8px; border-radius:8px; font-weight:700 }
+    .icon-btn{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; background:var(--btn-bg); color:#fff; transition:transform .12s ease, background .12s ease }
+    .icon-btn:hover{ transform:translateY(-2px); background:rgba(255,255,255,0.14) }
+
+    .cta-primary{ background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff; padding:10px 16px; border-radius:10px; font-weight:800; text-decoration:none; box-shadow:var(--card-shadow); display:inline-flex; align-items:center; gap:8px }
+    .cta-primary .material-symbols-rounded{ font-size:1.05rem }
+
+    /* menu */
+    .menu {
+      position: absolute;
+      right: -25px;
+      top: 64px;
+      min-width: 220px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95));
+      border-radius:10px;
+      box-shadow:0 10px 35px rgba(0,0,0,0.18);
+      overflow:hidden;
+      display:none;
+      backdrop-filter: blur(6px);
+    }
+    .menu[aria-hidden="false"]{ display:block; }
+    .menu a{
+      display:block; padding:12px 14px; text-decoration:none; color:var(--nav-a);
+      font-weight:600; transition: background .18s, color .18s;
+    }
+    .menu a:hover, .menu a:focus{ background:var(--accent); color:#fff; outline:none }
+
+    /* HERO */
+    .hero{
+      padding:48px 16px 36px; text-align:center; position:relative; z-index:1;
+      overflow:visible;
+    }
+    .hero-sub{ color:#2ca44d; margin:0; font-weight:600; font-size:clamp(.9rem,2.7vw,1.1rem) }
+    .hero-title{
+      display:inline-block;
+      margin:12px 0 6px;
+      font-weight:900;
+      line-height:0.9;
+      letter-spacing:-1px;
+      font-size:clamp(3.6rem,12vw,8.2rem);
+      color:var(--accent-2);
+      position:relative;
+      -webkit-text-stroke: 0px rgba(0,0,0,0.05);
+    }
+
+    /* dynamic "Wonder" word styling */
+    .hero-title .wonder{
+      display:inline-block;
+      font-weight:900;
+      background: linear-gradient(90deg,#ffd36b,#ff8aa1,#7ed6ff,#56ccf2);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: wonderFlow 6s linear infinite;
+      transform-origin:center;
+      text-shadow: 0 6px 24px rgba(42,109,209,0.12);
+      filter: drop-shadow(0 6px 20px rgba(0,191,255,0.06));
+    }
+    @keyframes wonderFlow{
+      0%{ background-position:0% 50%; transform:translateY(0) rotateX(0) }
+      25%{ background-position:50% 50%; transform:translateY(-6px) rotateX(1deg) }
+      50%{ background-position:100% 50%; transform:translateY(0) rotateX(0) }
+      75%{ background-position:50% 50%; transform:translateY(6px) rotateX(-1deg) }
+      100%{ background-position:0% 50%; transform:translateY(0) rotateX(0) }
+    }
+
+    .hero-title .gallery{ display:block; font-size:clamp(1.2rem,4vw,2.4rem); color:#f49c23; font-weight:700; margin-top:6px }
+
+    /* Call to actions */
+    .hero-ctas{ display:flex; gap:12px; justify-content:center; margin-top:18px; flex-wrap:wrap }
+    .cta-ghost{ padding:10px 14px; background:transparent; border-radius:10px; color:var(--accent-2); font-weight:700; text-decoration:none; border:2px solid rgba(42,109,209,0.08) }
+    .cta-ghost:hover{ background:var(--accent-2); color:#fff; border-color:rgba(255,255,255,0.2);transition: 200ms; }
+
+    /* background decor */
+    .bg-stars{
+      position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.06;
+      background-repeat:repeat;
+      animation: panStars 120s linear infinite;
+    }
+    @keyframes panStars{ to { background-position: 400px -400px } }
+
+    /* SECTIONS - shared */
+    section { padding:28px 16px; position:relative; z-index:1 }
+    h2.section-title{ color:var(--accent-2); font-size:clamp(1.25rem,3.2vw,2rem); margin:0 0 16px; text-align:center }
+
+    /* marquee */
+    .marquee {
+      overflow:hidden;
+      width:100%;
+      border-radius:var(--radius);
+      background:linear-gradient(180deg,#fff,var(--muted));
+      padding:20px;
+      padding-top: 40px;
+      padding-bottom: 40px;
+      box-shadow:var(--card-shadow);
+    }
+    .track {
+      display:flex; gap:20px; align-items:stretch;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+    .card {
+      min-width:280px; max-width:340px;
+      background:linear-gradient(180deg,#fff,#f2fbff);
+      border-radius:12px; padding:14px; text-align:center;
+      box-shadow:0 8px 26px rgba(0,0,0,0.06);
+      flex:0 0 auto;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .card img{ width:80px; height:80px; object-fit:contain; margin-bottom:10px }
+    .card h3{ margin:6px 0; font-size:1rem; color:#0077b6 }
+    .card p{ font-size:.85rem; color:#1b5e20; text-transform:uppercase; letter-spacing:.6px }
+
+    .card:hover{ transform:translateY(-6px); box-shadow:0 18px 40px rgba(42,109,209,0.12) }
+
+    /* gallery rows */
+    .row-preview{
+      display:flex; gap:10px; overflow:auto; padding:12px; scroll-snap-type:x mandatory;
+    }
+    .row-preview img{
+      width:220px; height:220px; object-fit:cover; border-radius:10px; flex:0 0 auto; scroll-snap-align:center; box-shadow:0 8px 26px rgba(0,0,0,0.06)
+    }
+
+    /* skeleton loader */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.06), rgba(0,0,0,0.04));
+      background-size: 200% 100%;
+      animation: shine 1.2s linear infinite;
+      border-radius:10px;
+      width:220px; height:220px; flex:0 0 auto;
+    }
+    @keyframes shine { from { background-position: 100% 0 } to { background-position: -100% 0 } }
+
+    /* testimonials as cards */
+    .testimonials-grid{ display:flex; gap:12px; overflow:hidden }
+    .testimonial { min-width:220px; max-width:300px; background:linear-gradient(180deg,#fff,#eaf6ff); border-radius:12px; padding:14px; text-align:center; box-shadow:var(--card-shadow) }
+    .testimonial img{ width:64px; height:64px; border-radius:50%; border:3px solid var(--accent-2); display:block; margin:0 auto 8px }
+    .testimonial h4{ margin:6px 0 4px; color:var(--accent-2) }
+    .testimonial p{ font-style:italic; color:#0b2436; font-size:.95rem }
+
+    /* about section */
+    .about { display:flex; gap:18px; align-items:center; justify-content:center; flex-wrap:wrap; margin-top:6px }
+    .about img{ width:320px; max-width:90%; border-radius:12px; box-shadow:var(--card-shadow) }
+    .about .text{ max-width:640px; text-align:left }
+
+    /* footer */
+    footer.site-footer{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff; padding:28px 16px; border-radius:18px 18px 0 0; margin-top:24px }
+    .footer-inner{ display:flex; gap:20px; justify-content:space-around; flex-wrap:wrap }
+
+    /* small screens */
+    @media (max-width:880px){
+      .hero-title{ font-size:clamp(2.8rem,18vw,6.4rem) }
+      .card{ min-width:180px }
+      .row-preview img{ width:160px; height:160px }
+      .brand img{ width:32px; height:32px }
+      .hero{ padding-top:32px }
+    }
+
+    /* reduced-motion */
+    @media (prefers-reduced-motion: reduce){
+      .hero-title .wonder, .bg-stars, .card, .track { animation: none; transition: none; }
+      .skeleton { animation: none; }
+    }
+
+    /* make buttons & text consistent */
+    a, button { font-family: "Poppins", Arial, sans-serif; }
+    .muted { color:#174b31; font-size:.9rem }
+  </style>
+</head>
+<body>
+  <div class="bg-stars" aria-hidden="true"></div>
+
+  <header class="site-header" role="banner">
+    <div class="brand">
+      <img src="https://i.postimg.cc/k5WvY28H/G.png" alt="Wonder Gallery logo" />
+      <span>Wonder Gallery</span>
+    </div>
+
+    <div class="nav-actions" aria-hidden="false">
+      <div style="position:relative;">
+        <button id="menuToggle" class="icon-btn" aria-controls="siteMenu" aria-expanded="false" aria-haspopup="true" title="Open menu">
+          <span class="material-symbols-rounded" aria-hidden="true">menu</span>
+          <span class="sr-only">Open menu</span>
+        </button>
+
+        <nav id="siteMenu" class="menu" aria-hidden="true" role="navigation" aria-label="Main menu">
+          <a href="https://wondergallery.github.io/wondergallery/main-page/">Home</a>
+          <a href="https://wondergallery.github.io/wondergallery/about-us/">About Us</a>
+          <a href="https://wondergallery.github.io/wondergallery/collection/">Collections</a>
+          <a href="https://wondergallery.github.io/wondergallery/contact/">Contact</a>
+          <a href="https://wondergallery.github.io/wondergallery/rate-us/">Rate Us</a>
+          <a href="https://wondergallery.github.io/wondergallery/admin/">Admin Panel</a>
+        </nav>
+      </div>
+
+      <a class="cta-primary" href="https://wondergallery.github.io/wondergallery/collection/" title="View collection">View Collection <span class="material-symbols-rounded" aria-hidden="true">east</span></a>
+    </div>
+  </header>
+  <main>
+    <br><br><br>
+    <!-- HERO -->
+    <section class="hero" role="region" aria-label="Intro">
+      <div>
+        <p class="hero-sub">Welcome to our</p>
+
+        <!-- VERY BOLD + DYNAMIC "Wonder" -->
+        <h1 class="hero-title" aria-hidden="false">
+          <span class="wonder">Wonder</span>
+          <span class="gallery">Gallery</span>
+        </h1>
+
+        <div class="hero-ctas" role="group" aria-label="Primary actions">
+          <a class="cta-primary" href="https://wondergallery.github.io/wondergallery/collection/">Explore Wallboards</a>
+          <a class="cta-ghost" href="https://wondergallery.github.io/wondergallery/about-us/">Learn More</a>
+        </div>
+      </div>
+    </section>
+<br><br><br><br>
+    <!-- Services (marquee style) -->
+    <section aria-labelledby="servicesHeading">
+      <h2 id="servicesHeading" class="section-title">Our Services</h2>
+      <div class="marquee" id="servicesMarquee" aria-live="polite">
+        <div class="track" id="servicesTrack" data-loop-speed="18">
+          <!-- seed cards (kept small, JS will duplicate to create continuous loop) -->
+          <article class="card" data-type="service" aria-label="Packaged Wallboards">
+            <img loading="lazy" src="https://cdn.pixabay.com/photo/2024/06/26/23/36/package-8856091_1280.png" alt="Packaged icon">
+            <h3>Packaged Wallboards</h3>
+            <p>Ready-to-hang sets</p>
+          </article>
+
+          <article class="card" data-type="service" aria-label="Piece Wallboards">
+            <img loading="lazy" src="https://copilot.microsoft.com/th/id/BCO.b112ded8-4d0a-462c-bdc1-6dc65438e0f7.png" alt="Piece icon">
+            <h3>Piece Wallboards</h3>
+            <p>Single unique pieces</p>
+          </article>
+
+          <article class="card" data-type="service" aria-label="Customized Wallboards">
+            <img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/14018/14018845.png" alt="Custom icon">
+            <h3>Customized Wallboards</h3>
+            <p>Personalized designs</p>
+          </article>
+        </div>
+      </div>
+    </section>
+<br><br><br>
+    <!-- Normal preview -->
+    <section aria-labelledby="normalHeading">
+      <h2 id="normalHeading" class="section-title">Explore our normal <strong>Wallboards</strong></h2>
+      <div class="marquee" style="padding:30px;">
+        <div class="row-preview" id="normalRow" tabindex="0" aria-label="Normal wallboard previews">
+          <!-- placeholders / images inserted by JS -->
+        </div>
+        <div style="text-align:center; margin-top:10px;">
+          <a class="cta-primary" href="https://wondergallery.github.io/wondergallery/collection/">See Normal Wallboards</a>
+        </div>
+      </div>
+    </section>
+<br><br><br>
+
+    <!-- Packaged preview -->
+    <section aria-labelledby="packagedHeading">
+      <h2 id="packagedHeading" class="section-title">Explore our package <strong>Wallboards</strong></h2>
+      <div class="marquee" style="padding:30px;">
+        <div class="row-preview" id="packagedRow" tabindex="0" aria-label="Packaged wallboard previews">
+          <!-- placeholders / images inserted by JS -->
+        </div>
+        <div style="text-align:center; margin-top:10px;">
+          <a class="cta-primary" href="https://wondergallery.github.io/wondergallery/collection/">See Packaged Wallboards</a>
+        </div>
+      </div>
+    </section>
+<br><br><br>
+
+    <!-- About -->
+    <section aria-labelledby="aboutHeading">
+      <h2 id="aboutHeading" class="section-title">About Us</h2>
+      <div class="about">
+        <img loading="lazy" src="https://i.postimg.cc/k5WvY28H/G.png" alt="Our team image">
+        <div class="text">
+          <h3 style="color:var(--accent); margin:0 0 8px">We Bring Imagination to Life 🎨</h3>
+          <p style="margin:0 0 8px">
+            At <strong>Wonder Gallery</strong> we craft visuals that speak. From one-off pieces to curated packages,
+            we blend color, composition and sound to create uplifting spaces. We’re small, intentional, and playful.
+          </p>
+          <p style="margin:0 0 12px">Join our creative community — discover, customize, and hang a piece of wonder.</p>
+          <a class="cta-ghost" href="https://wondergallery.github.io/wondergallery/about-us/">Learn More</a>
+        </div>
+      </div>
+    </section>
+<br><br><br>
+
+    <!-- Testimonials -->
+    <section aria-labelledby="testiHeading">
+      <h2 id="testiHeading" class="section-title">Testimonials</h2>
+      <div class="marquee" style="padding:12px;">
+        <!-- Testimonials track: this will be replaced by Firestore data when available.
+             Firestore collection expected: 'testimonials'
+             Document shape recommendation:
+               { name: string, text: string, avatar: string (url), visible: boolean, order: number }
+        -->
+        <div class="track" id="testimonialsTrack" data-loop-speed="14" aria-live="polite">
+          <!-- fallback/static testimonials (will be replaced by remote data if present) -->
+          <article class="testimonial" data-doc-id="fallback-emily" aria-label="Emily testimonial">
+            <img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/168/168726.png" alt="Emily avatar">
+            <h4>Emily</h4>
+            <p>“The Wonder Gallery blew my mind! Their pieces transformed my living room.”</p>
+          </article>
+
+          <article class="testimonial" data-doc-id="fallback-ryan" aria-label="Ryan testimonial">
+            <img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/168/168733.png" alt="Ryan avatar">
+            <h4>Ryan</h4>
+            <p>“Stunning visuals and great service. Highly recommended.”</p>
+          </article>
+
+          <article class="testimonial" data-doc-id="fallback-sadman" aria-label="Sadman testimonial">
+            <img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/168/168732.png" alt="Sadman avatar">
+            <h4>Sadman</h4>
+            <p>“Beautiful visuals, amazing vibe. My guests love it!”</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+<br><br><br>
+
+  <!-- Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div style="max-width:320px">
+        <strong style="display:block; font-size:1.05rem">Wonder Gallery</strong>
+        <p style="margin:.4rem 0 0">Where art, sound, and imagination come together. Explore creativity and color with us every day 🎨</p>
+      </div>
+
+      <div>
+        <strong>Quick Links</strong>
+        <div style="margin-top:8px">
+          <a href="https://wondergallery.github.io/wondergallery/main-page/" style="color:rgba(255,255,255,0.95); text-decoration:none; display:block; margin:.3rem 0">Home</a>
+          <a href="https://wondergallery.github.io/wondergallery/about-us/" style="color:rgba(255,255,255,0.95); text-decoration:none; display:block; margin:.3rem 0">About</a>
+          <a href="https://wondergallery.github.io/wondergallery/contact/" style="color:rgba(255,255,255,0.95); text-decoration:none; display:block; margin:.3rem 0">Contact</a>
+        </div>
+      </div>
+
+      <div>
+        <strong>Follow Us</strong>
+        <div style="display:flex; gap:8px; margin-top:8px">
+          <a href="https://www.facebook.com/share/1BhzdGrJj4/" aria-label="Facebook" style="display:inline-block"><img alt="Facebook" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/733/733547.png" width="28" height="28"></a>
+          <a href="https://www.instagram.com/wondergallery_2025?igsh=ODNzbWRoZHFrMnEx" aria-label="Instagram" style="display:inline-block"><img alt="Instagram" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/733/733558.png" width="28" height="28"></a>
+          <a href="https://x.com/wondergallery2" aria-label="Twitter" style="display:inline-block"><img alt="Twitter" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/733/733579.png" width="28" height="28"></a>
+          <a href="https://www.youtube.com/@wondergallery-2003" aria-label="YouTube" style="display:inline-block"><img alt="YouTube" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="28" height="28"></a>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:14px; border-top:1px solid rgba(255,255,255,0.12); padding-top:12px">
+      <small>© 2025 Wonder Gallery | All Rights Reserved 💙</small>
+    </div>
+  </footer>
+
+  <!-- Screen-reader helper -->
+  <style>
+    .sr-only{ position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden }
+  </style>
+
+  <!-- Firebase (compat) SDKs - optional: only needed if you intend to use Firestore admin features.
+       Replace firebaseConfig with your project details. -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    /* =========================
+       ACCESSIBLE MENU TOGGLE
+       ========================= */
+    (function(){
+      const btn = document.getElementById('menuToggle');
+      const menu = document.getElementById('siteMenu');
+
+      function openMenu(){
+        btn.setAttribute('aria-expanded','true');
+        menu.setAttribute('aria-hidden','false');
+      }
+      function closeMenu(){
+        btn.setAttribute('aria-expanded','false');
+        menu.setAttribute('aria-hidden','true');
+      }
+      btn.addEventListener('click', (e)=>{
+        const isOpen = btn.getAttribute('aria-expanded') === 'true';
+        if(isOpen) closeMenu(); else openMenu();
+        e.stopPropagation();
+      });
+      document.addEventListener('click', (e)=>{
+        if(!menu.contains(e.target) && e.target !== btn) closeMenu();
+      });
+      // keyboard support
+      btn.addEventListener('keydown', e=>{
+        if(e.key === 'Escape') closeMenu();
+        if((e.key === 'Enter' || e.key === ' ') && btn.getAttribute('aria-expanded') !== 'true'){ e.preventDefault(); openMenu(); }
+      });
+      // hide on load for safety
+      document.addEventListener('DOMContentLoaded', ()=> closeMenu());
+    })();
+
+    /* =========================
+       MARQUEE / TRACK LOOP
+       - duplicates small seed items until track width fills
+       - uses requestAnimationFrame for smooth transform
+       - hover or touch pause
+       - exposes setupLoop / stopTrack to allow dynamic re-init
+       ========================= */
+    (function(){
+      const setupLoop = (trackEl, options = {}) => {
+        const speed = parseFloat(trackEl.dataset.loopSpeed) || (options.speed || 18); // px/sec
+        const cloneUntil = () => {
+          const parent = trackEl;
+          const containerWidth = parent.parentElement.clientWidth;
+          // duplicate seed children until track width > containerWidth * 2 (smooth)
+          let totalW = parent.scrollWidth;
+          let i = 0;
+          // Limit clones to avoid runaway duplication on very small seeds
+          while(totalW < containerWidth * 2 && i < 16){
+            const children = Array.from(parent.children).slice(0, parent.children.length);
+            children.forEach(c => parent.appendChild(c.cloneNode(true)));
+            totalW = parent.scrollWidth;
+            i++;
+          }
+        };
+
+        // ensure role
+        trackEl.setAttribute('role','list');
+
+        // create continuous translate animation using requestAnimationFrame
+        let px = 0;
+        const step = (ts) => {
+          if(!trackEl._last) trackEl._last = ts;
+          const dt = (ts - trackEl._last) / 1000;
+          trackEl._last = ts;
+          const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if(!reduced){
+            px += speed * dt;
+            if(px >= trackEl.scrollWidth / 2) px = px - (trackEl.scrollWidth / 2);
+            trackEl.style.transform = `translateX(${-px}px)`;
+          }
+          trackEl._req = requestAnimationFrame(step);
+        };
+
+        // reset any previous animation first
+        if(trackEl._req) cancelAnimationFrame(trackEl._req);
+        trackEl._last = null;
+        trackEl.style.transform = '';
+
+        cloneUntil();
+        // start animation
+        trackEl._req = requestAnimationFrame(step);
+
+        // pause on hover/focus for accessibility
+        const parentEl = trackEl.parentElement;
+        const pause = ()=> { if(trackEl._req) cancelAnimationFrame(trackEl._req); };
+        const resume = ()=> { trackEl._last = performance.now(); trackEl._req = requestAnimationFrame(step); };
+
+        parentEl.addEventListener('mouseenter', pause);
+        parentEl.addEventListener('mouseleave', resume);
+        parentEl.addEventListener('focusin', pause);
+        parentEl.addEventListener('focusout', resume);
+      };
+
+      // expose useful helpers so other parts of the script can re-init a track after dynamic updates
+      window.setupLoop = setupLoop;
+      window.stopTrack = (trackEl) => {
+        if(!trackEl) return;
+        if(trackEl._req) cancelAnimationFrame(trackEl._req);
+        trackEl._req = null;
+        trackEl._last = null;
+        trackEl.style.transform = '';
+        // remove clones: keep only first N native children if data-doc-id present or simple heuristic
+        // safest approach: do nothing with children here; the caller may replace innerHTML entirely.
+      };
+
+      // initialize services and testimonials tracks
+      document.addEventListener('DOMContentLoaded', ()=>{
+        const serviceTrack = document.getElementById('servicesTrack');
+        const testiTrack = document.getElementById('testimonialsTrack');
+        if(serviceTrack) setupLoop(serviceTrack, { speed: 18 });
+        if(testiTrack) setupLoop(testiTrack, { speed: 12 });
+
+        // Make marquee touch-scrollable on mobile for user control (no conflict with animation because enter/leave pauses)
+        const marquees = document.querySelectorAll('.marquee');
+        marquees.forEach(m => {
+          m.addEventListener('touchstart', ()=> {
+            // pause animations on touch
+            const track = m.querySelector('.track');
+            if(track && track._req) cancelAnimationFrame(track._req);
+          }, {passive:true});
+          m.addEventListener('touchend', ()=> {
+            const track = m.querySelector('.track');
+            if(track) {
+              track._last = performance.now();
+              // ensure the loop resumes via setupLoop (keeps state consistent)
+              if(window.setupLoop) window.setupLoop(track, { speed: parseFloat(track.dataset.loopSpeed) || 12 });
+            }
+          }, {passive:true});
+        });
+      });
+    })();
+
+    /* =========================
+       ROW PREVIEW KEYBOARD SCROLL
+       ========================= */
+    (function(){
+      const rows = document.querySelectorAll('.row-preview');
+      rows.forEach(row=>{
+        row.addEventListener('keydown', e=>{
+          if(e.key === 'ArrowRight') { row.scrollBy({ left: 160, behavior:'smooth' }); e.preventDefault(); }
+          if(e.key === 'ArrowLeft') { row.scrollBy({ left: -160, behavior:'smooth' }); e.preventDefault(); }
+        });
+      });
+    })();
+
+  /* =========================
+     RANDOM IMAGE SYSTEM (Improved & Firebase-ready)
+     - slower, deliberate loading with skeletons
+     - unbiased shuffle (Fisher–Yates)
+     - supports Firestore 'products' collection (if configured)
+     ========================= */
+
+  // Configuration: how many images to show and the simulated load delay.
+  const NORMAL_COUNT = 10;
+  const PACKAGED_COUNT = 9;
+  const RENDER_DELAY_MS_MIN = 700; // minimum simulated load delay
+  const RENDER_DELAY_MS_MAX = 1200; // maximum simulated load delay to slow down "instant load" feeling
+
+  // Local fallback pools (used if Firebase not configured)
+  let normalImages = [
+    "https://i.postimg.cc/GpcbjCGJ/Screenshot-2025-11-13-203149.png",
+    "https://i.postimg.cc/vZ28zmLv/Whisk-4978f387f9ac05c8df446cfa508ff4b2dr.png",
+    "https://i.postimg.cc/KzS2q31d/Whisk-2642739841159e0b92e4f650dd6f7f0fdr.png",
+    "https://i.postimg.cc/k5WvY28H/G.png"
+  ];
+  let packagedImages = [
+    "https://i.postimg.cc/GpcbjCGJ/Screenshot-2025-11-13-203149.png",
+    "https://i.postimg.cc/vZ28zmLv/Whisk-4978f387f9ac05c8df446cfa508ff4b2dr.png",
+    "https://i.postimg.cc/KzS2q31d/Whisk-2642739841159e0b92e4f650dd6f7f0fdr.png"
+  ];
+
+  // Fisher–Yates shuffle (unbiased)
+  function shuffle(array){
+    const a = array.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // helper: random delay between min & max
+  function randomDelay(){
+    return Math.floor(Math.random() * (RENDER_DELAY_MS_MAX - RENDER_DELAY_MS_MIN + 1)) + RENDER_DELAY_MS_MIN;
+  }
+
+  // generate a readable alt (fallback)
+  function altFromUrl(url, index){
+    try {
+      const parts = url.split('/').pop().split('?')[0].split('.');
+      return parts.slice(0, -1).join('.') || `Preview ${index + 1}`;
+    } catch {
+      return `Preview ${index + 1}`;
+    }
+  }
+
+  // render with skeleton placeholders then actual images after a short delay
+  function renderRandomImages(containerId, imageList, count) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // clear previous
+    container.innerHTML = '';
+
+    // show skeletons for perceived slow loading
+    const skeletonCount = Math.min(count, 6); // show up to 6 skeleton placeholders
+    for (let i=0;i<skeletonCount;i++){
+      const s = document.createElement('div');
+      s.className = 'skeleton';
+      container.appendChild(s);
+    }
+
+    // actual render after simulated delay
+    const delay = randomDelay();
+    setTimeout(() => {
+      // clear skeletons
+      container.innerHTML = '';
+
+      // cap count
+      const available = imageList.length;
+      const showCount = Math.min(count, available);
+
+      const shuffled = shuffle(imageList).slice(0, showCount);
+
+      shuffled.forEach((src, index) => {
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = altFromUrl(src, index);
+        img.loading = "lazy";
+        img.width = 220;
+        img.height = 220;
+        // image enter animation for subtle interest
+        img.style.opacity = 0;
+        img.style.transition = 'opacity .6s ease';
+        container.appendChild(img);
+        // reveal when loaded (or after short timeout)
+        img.addEventListener('load', ()=> { img.style.opacity = 1; });
+        setTimeout(()=> { img.style.opacity = 1; }, 800);
+      });
+
+      // announce for screen readers
+      const live = document.getElementById('previewAnnouncements');
+      if (live) {
+        const rowName = containerId === 'normalRow' ? 'Normal' : containerId === 'packagedRow' ? 'Packaged' : containerId;
+        live.textContent = `${rowName} previews loaded (${Math.min(count, imageList.length)}).`;
+        setTimeout(()=>{ live.textContent = ''; }, 1400);
+      }
+    }, delay);
+  }
+
+  // Public init function used after attempting Firestore fetch (or falling back to local arrays)
+  function initPreviews(){
+    renderRandomImages("normalRow", normalImages, NORMAL_COUNT);
+    renderRandomImages("packagedRow", packagedImages, PACKAGED_COUNT);
+  }
+
+  // Slightly delay initial render to feel deliberate and match slower perceived load
+  document.addEventListener("DOMContentLoaded", () => {
+    // Add a tiny UX delay so hero and nav render first
+    setTimeout(initPreviews, 600);
+
+    // Accessibility announcer element (hidden)
+    if(!document.getElementById('previewAnnouncements')){
+      const div = document.createElement('div');
+      div.id = 'previewAnnouncements';
+      div.setAttribute('aria-live','polite');
+      div.setAttribute('aria-atomic','true');
+      div.style.position = 'absolute';
+      div.style.left = '-9999px';
+      div.style.width = '1px';
+      div.style.height = '1px';
+      div.style.overflow = 'hidden';
+      document.body.appendChild(div);
+    }
+  });
+
+  /* =========================
+     FIRESTORE INTEGRATION (Admin add/delete)
+     - OPTIONAL: configure firebaseConfig below and create
+       a 'products' collection in Firestore
+     - product documents expected to contain at least:
+         { image: string (url), type: 'normal'|'packaged'|'other', title: string, price: number }
+     - This page will subscribe to realtime updates and update preview pools.
+     - This file also listens to a 'testimonials' collection and will replace
+       the testimonials track with live data when it exists.
+     ========================= */
+
+  // Replace this object with your Firebase project's config to enable Firestore syncing.
+  const firebaseConfig = {
+    apiKey: "AIzaSyAAxd5YMkan5xfiIoR8yGOhVg168ZZoFqY",        // <-- fill me
+    authDomain: "wonder-collection.firebaseapp.com",
+    projectId: "wonder-collection",
+    // rest of config...
+  };
+
+  // boolean toggle to attempt Firestore connection. Set false to skip attempting (useful for local dev)
+  const TRY_FIRESTORE = true; // change to true after filling firebaseConfig
+
+  // Firestore references
+  let db = null;
+  let productsUnsubscribe = null;
+  let testimonialsUnsubscribe = null;
+
+  function renderTestimonialsToTrack(testimonialsArray){
+    const track = document.getElementById('testimonialsTrack');
+    if(!track) return;
+
+    // stop current animation safely
+    if(window.stopTrack) window.stopTrack(track);
+
+    // clear current content
+    track.innerHTML = '';
+
+    // if no testimonials, keep fallback seeds (nothing to do)
+    if(!testimonialsArray || testimonialsArray.length === 0){
+      // Optionally, leave fallback content if present in markup.
+      // If fallback removed, you could create a small placeholder here.
+      // For now, do nothing and the static fallback in HTML remains if not replaced.
+      return;
+    }
+
+    // build testimonial articles from data (expecting { id, name, text, avatar })
+    testimonialsArray.forEach(item => {
+      const art = document.createElement('article');
+      art.className = 'testimonial';
+      if(item.id) art.setAttribute('data-doc-id', item.id);
+      if(item.name) art.setAttribute('aria-label', `${item.name} testimonial`);
+
+      const img = document.createElement('img');
+      img.loading = 'lazy';
+      img.alt = item.name ? `${item.name} avatar` : 'Testimonial avatar';
+      img.src = item.avatar || 'https://cdn-icons-png.flaticon.com/512/168/168726.png';
+
+      const h4 = document.createElement('h4');
+      h4.textContent = item.name || 'Anonymous';
+
+      const p = document.createElement('p');
+      p.textContent = item.text || '';
+
+      art.appendChild(img);
+      art.appendChild(h4);
+      art.appendChild(p);
+
+      track.appendChild(art);
+    });
+
+    // restart the loop for the updated track
+    if(window.setupLoop) window.setupLoop(track, { speed: parseFloat(track.dataset.loopSpeed) || 12 });
+  }
+
+  function initFirebaseIfConfigured(){
+    if(!TRY_FIRESTORE) return Promise.resolve(false);
+    try {
+      if(!firebaseConfig || !firebaseConfig.projectId) {
+        console.warn('Firebase config incomplete — skipping Firestore init.');
+        return Promise.resolve(false);
+      }
+      // Initialize compat SDK
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+
+      // Listen to products collection in realtime
+      productsUnsubscribe = db.collection('products').onSnapshot(snapshot => {
+        const normal = [];
+        const packaged = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          // classify by type field (case-insensitive)
+          const t = (data.type || '').toString().toLowerCase();
+          const url = data.image || data.img || data.url || '';
+          if(t === 'packaged' || t === 'package') packaged.push(url);
+          else normal.push(url);
+        });
+
+        // only update pools if we got data
+        if(normal.length || packaged.length){
+          // merge with fallback but prefer remote lists
+          if(normal.length) normalImages = normal;
+          if(packaged.length) packagedImages = packaged;
+          // re-render previews with a slightly longer delay to surface remote changes
+          setTimeout(initPreviews, 700);
+        }
+      }, err => {
+        console.error('Products snapshot error:', err);
+      });
+
+      // Listen to testimonials collection in realtime (optional)
+      testimonialsUnsubscribe = db.collection('testimonials')
+        .where('visible', '==', true)
+        .orderBy('order', 'asc')
+        .onSnapshot(snapshot => {
+          const testimonials = [];
+          snapshot.forEach(doc => {
+            const d = doc.data();
+            testimonials.push({
+              id: doc.id,
+              name: d.name || d.title || 'Anonymous',
+              text: d.text || d.message || '',
+              avatar: d.avatar || d.image || '',
+              order: d.order || 0
+            });
+          });
+
+          if(testimonials.length){
+            // replace testimonials track with the remote set
+            renderTestimonialsToTrack(testimonials);
+          } else {
+            // if server has none visible, do not remove fallback automatically
+            console.log('No visible testimonials from Firestore — keeping fallback content.');
+          }
+        }, err => {
+          console.error('Testimonials snapshot error:', err);
+        });
+
+      return Promise.resolve(true);
+    } catch (err) {
+      console.error('Firebase init failed:', err);
+      return Promise.resolve(false);
+    }
+  }
+
+  // Admin helpers: add / delete product documents.
+  // These functions assume your admin UI will call them (with auth) from another page.
+  // They are provided here so the same SDK can be used if you want to trigger changes from this page.
+  function addProductFirestore(product){
+    if(!db) { console.warn('Firestore not initialized'); return Promise.reject('Firestore not initialized'); }
+    // product = { image, type, title, price }
+    return db.collection('products').add(product);
+  }
+
+  function deleteProductFirestore(docId){
+    if(!db) { console.warn('Firestore not initialized'); return Promise.reject('Firestore not initialized'); }
+    return db.collection('products').doc(docId).delete();
+  }
+
+  // Admin helpers for testimonials
+  function addTestimonialFirestore(testimonial){
+    if(!db) { console.warn('Firestore not initialized'); return Promise.reject('Firestore not initialized'); }
+    // testimonial = { name, text, avatar, visible: true, order: 0 }
+    return db.collection('testimonials').add(testimonial);
+  }
+
+  function deleteTestimonialFirestore(docId){
+    if(!db) { console.warn('Firestore not initialized'); return Promise.reject('Firestore not initialized'); }
+    return db.collection('testimonials').doc(docId).delete();
+  }
+
+  // Initialize Firestore listener if enabled
+  document.addEventListener('DOMContentLoaded', ()=>{
+    initFirebaseIfConfigured().then(connected=>{
+      if(connected){
+        console.log('Connected to Firestore for product and testimonial sync.');
+      } else {
+        console.log('Firestore not connected — using local image pools and fallback testimonials.');
+      }
+    });
+  });
+
+  /* =========================
+     SMALL ENHANCEMENTS
+     - slower touch scroll resume, better image alt fallback,
+     - ensures duplicates prevented within a render and clearer UX
+     ========================= */
+
+  // ensure shuffle won't duplicate more than pool
+  // (renderRandomImages uses slice to cap to available items)
+
+  // improve touch resume behavior for marquees by small delay
+  document.addEventListener('DOMContentLoaded', ()=>{
+    document.querySelectorAll('.marquee').forEach(m => {
+      m.addEventListener('touchend', ()=> {
+        setTimeout(()=> {
+          const track = m.querySelector('.track');
+          if(track && track._last) track._last = performance.now();
+        }, 250);
+      }, {passive:true});
+    });
+  });
+
+  /* =========================
+     CLEANUP ON UNLOAD
+     ========================= */
+  window.addEventListener('beforeunload', ()=>{
+    if(productsUnsubscribe) productsUnsubscribe();
+    if(testimonialsUnsubscribe) testimonialsUnsubscribe();
+  });
+  </script>
+</body>
+</html>

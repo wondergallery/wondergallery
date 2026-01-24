@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wonder Gallery — Checkout</title>
+  <meta name="description" content="Checkout — Wonder Gallery. Confirm your order and send batch codes via WhatsApp." />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;900&family=Material+Symbols+Rounded" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f5fbff;
+      --accent:#00bfff;
+      --accent-2:#2a6dd1;
+      --muted:#e6f7ff;
+      --card-shadow: 0 8px 28px rgba(12, 46, 98, 0.28);
+      --radius:12px;
+      --text:#07233a;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:"Poppins", Arial, sans-serif; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+      line-height:1.35;
+    }
+
+    /* Header */
+    .site-header{
+      position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:12px 18px; background: linear-gradient(90deg,var(--accent),var(--accent-2));
+      box-shadow:0 6px 20px rgba(0,119,182,0.12); color:#fff;
+      border-bottom-left-radius:12px; border-bottom-right-radius:12px;
+    }
+    .brand { display:flex; gap:10px; align-items:center; font-weight:900; font-size:1.05rem }
+    .brand img{ width:36px; height:36px; border-radius:8px; object-fit:cover }
+
+    .nav-actions{ display:flex; gap:12px; align-items:center }
+
+    .btn{ border:0; background:transparent; color:inherit; cursor:pointer; padding:8px; border-radius:8px; font-weight:700 }
+    .btn-primary { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff; padding:10px 14px; border-radius:10px; box-shadow:var(--card-shadow) }
+    .btn-ghost { padding:10px 12px; border-radius:10px; color:var(--accent-2); border:2px solid rgba(42,109,209,0.06); background:transparent }
+
+    /* Layout */
+    .page { max-width:1100px; margin:28px auto; padding:0 16px; }
+    h1 { margin:0 0 6px; color:var(--accent-2); font-size:1.6rem; font-weight:900 }
+    .lead { color:#123047; margin:0 0 18px }
+
+    .grid { display:grid; grid-template-columns: 1fr 380px; gap:20px; align-items:start; }
+    @media (max-width:920px){ .grid{ grid-template-columns: 1fr; } }
+
+    /* Cart list */
+    .cart-list { background:linear-gradient(180deg,#fff,var(--muted)); padding:14px; border-radius:var(--radius); box-shadow:var(--card-shadow) }
+    .cart-item { display:flex; gap:12px; align-items:center; padding:10px; border-radius:10px; background:linear-gradient(180deg,#fff,#f7fcff); margin-bottom:10px; }
+    .cart-item img{ width:92px; height:72px; object-fit:cover; border-radius:8px }
+    .cart-item h3{ margin:0; font-size:1rem; color:#0077b6 }
+    .cart-item .meta { color:#234; font-size:.9rem; }
+    .qty { display:flex; gap:8px; align-items:center; margin-top:6px }
+    .qty button{ background:rgba(42,109,209,0.06); border-radius:6px; padding:6px 8px; color:var(--accent-2); border:0; cursor:pointer }
+
+    /* Order summary */
+    .summary { background:linear-gradient(180deg,#fff,var(--muted)); padding:14px; border-radius:var(--radius); box-shadow:var(--card-shadow); position:sticky; top:88px; height:fit-content }
+    .summary h4{ margin:0 0 6px }
+    .summary .row{ display:flex; justify-content:space-between; margin:8px 0; color:#234 }
+    .total { font-weight:900; color:var(--accent-2); font-size:1.2rem }
+
+    /* Checkout modal */
+    .modal-backdrop { position:fixed; inset:0; background:rgba(2,10,20,0.5); display:flex; align-items:center; justify-content:center; z-index:200 }
+    .modal { background:#fff; border-radius:12px; padding:18px; width:96%; max-width:520px; box-shadow:var(--card-shadow) }
+    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:12px }
+    .field label{ font-weight:700; color:var(--accent-2) }
+    .field input, .field textarea, .field select { padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); font-size:1rem }
+
+    .note { font-size:.9rem; color:#31526d }
+
+    /* small helpers */
+    .muted { color:#4b6b7c }
+    .empty { text-align:center; padding:28px; color:#49687f }
+
+    /* visually distinct batch code list */
+    .batches { margin-top:10px; display:flex; flex-direction:column; gap:8px }
+    .batch { background:linear-gradient(90deg,#fff,#f0fbff); padding:8px 10px; border-radius:8px; font-weight:700; color:#0b3b5a; box-shadow:0 6px 18px rgba(10,40,80,0.06); display:flex; justify-content:space-between; align-items:center }
+    .batch small { color:#3b6b8a; font-weight:600 }
+
+    /* responsive */
+    @media (max-width:520px){
+      .cart-item img{ width:78px; height:62px }
+      .summary { position:static; }
+    }
+    
+    .back {
+      color:#fff; text-decoration:none; font-weight:700; font-size:.95rem; background:rgba(255,255,255,0.2); padding:6px 10px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="brand">
+      <img src="https://i.postimg.cc/k5WvY28H/G.png" alt="Wonder Gallery logo">
+      <div>
+        <div>Wonder Gallery</div>
+        <small style="opacity:.9; font-weight:700">Checkout</small>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <a href="https://wondergallery.github.io/wondergallery/collection/" class="back" title="Back to collection">← Back to Collection</a>
+    </div>
+  </header>
+
+  <main class="page" role="main">
+    <h1>Checkout</h1>
+    <p class="lead">Confirm your order and send the batch codes to us via WhatsApp. Enter your WhatsApp number when prompted — we'll include it in the message.</p>
+
+    <div class="grid" role="region" aria-label="Checkout grid">
+      <!-- Left: cart items -->
+      <div>
+        <section class="cart-list" aria-labelledby="cartHeading">
+          <h2 id="cartHeading" style="margin-top:0">Your Cart</h2>
+          <div id="cartContainer">
+            <!-- cart items render here -->
+          </div>
+
+          <div id="cartEmpty" class="empty" style="display:none">
+            Your cart is empty. Add something beautiful from the collection.
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:12px; align-items:center">
+            <button id="generateBatchesBtn" class="btn btn-primary" disabled>Generate Batch Codes & Checkout</button>
+            <button id="clearCartBtn" class="btn" style="color:#b03">Clear Cart</button>
+            <div class="muted" style="margin-left:auto; font-size:.95rem" id="cartCountText">0 items</div>
+          </div>
+        </section>
+
+        <!-- optional message preview -->
+        <section style="margin-top:14px; background:linear-gradient(180deg,#fff,var(--muted)); padding:12px; border-radius:12px; box-shadow:var(--card-shadow)">
+          <strong>Message Preview</strong>
+          <div id="messagePreview" style="white-space:pre-wrap; margin-top:8px; color:#103b55; font-size:.95rem" class="note">No checkout started.</div>
+        </section>
+      </div>
+
+      <!-- Right: summary -->
+      <aside>
+        <div class="summary" aria-labelledby="summaryHeading">
+          <h4 id="summaryHeading">Order Summary</h4>
+          <div class="row"><span>Items</span><span id="summaryItems">0</span></div>
+          <div class="row"><span>Subtotal</span><span id="summarySubtotal">$0.00</span></div>
+          <div class="row"><span>Estimated Shipping</span><span id="summaryShipping">$0.00</span></div>
+          <div class="row total"><span>Total</span><span id="summaryTotal">$0.00</span></div>
+
+          <div style="margin-top:12px;">
+            <small class="note">When you click "Generate Batch Codes & Checkout" you'll be asked for your WhatsApp number.
+            We'll compose a message with unique batch codes for each item and open WhatsApp so you can send it to us.</small>
+          </div>
+
+          <div id="batchesContainer" style="margin-top:12px"></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Checkout modal (hidden until needed) -->
+  <div id="checkoutModal" style="display:none" aria-hidden="true">
+    <div class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal">
+        <h3 style="margin:0 0 8px">Enter your WhatsApp number</h3>
+        <p class="note">We will include this number in the order message so we can reach you. Use international format like +1 555 555 5555 (we'll sanitize).</p>
+
+        <div class="field">
+          <label for="usergmail">Your Gmail <Address></Address></label>
+          <input id="usergmail" type="email" placeholder="e.g. example@gmail.com">
+        </div>
+
+        <div class="field">
+          <label for="orderNote">Order note (optional)</label>
+          <textarea id="orderNote" rows="3" placeholder="Anything you'd like to add for the artist or delivery..."></textarea>
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px">
+          <button id="cancelCheckout" class="btn">Cancel</button>
+          <button id="confirmCheckout" class="btn btn-primary">Send via WhatsApp</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  
+    /* ============================
+       Checkout page script
+       - reads cart from localStorage (wg_cart_v1)
+       - allows quantity edit and removal
+       - generates batch codes per item quantity
+       - prompts user for their WhatsApp number
+       - composes a paragraph including all codes + user's number
+       - opens WhatsApp (wa.me) to send message to owner
+       Notes:
+         * Set OWNER_WHATSAPP to your WhatsApp number in international format (no +, no dashes).
+           Example: '15551234567' for +1 555 123 4567
+    ============================ */
+// Put your numbers here
+  const numbers = [+8801857899398];
+
+  function getLockedRandomNumber() {
+    const storedNumber = localStorage.getItem('locked_whatsapp_number');
+
+    // If already picked before, use it
+    if (storedNumber) {
+      return storedNumber;
+    }
+
+    // Pick random
+    const randomIndex = Math.floor(Math.random() * numbers.length);
+    const pickedNumber = numbers[randomIndex];
+
+    // Lock it in localStorage
+    localStorage.setItem('locked_whatsapp_number', pickedNumber);
+
+    return pickedNumber;
+  }
+
+  // CONFIG: locked per person/browser
+  const OWNER_WHATSAPP = getLockedRandomNumber();
+
+    // Utility: get cart from localStorage
+    function readCart(){
+      try { return JSON.parse(localStorage.getItem('wg_cart_v1') || '[]') || []; } catch { return []; }
+    }
+    function writeCart(c){ localStorage.setItem('wg_cart_v1', JSON.stringify(c)); }
+
+    // Generate human-friendly unique code for an item
+    function generateCode(prefix='ITM', idx=0){
+      
+    }
+
+    // Build UI
+    const cartContainer = document.getElementById('cartContainer');
+    const cartEmpty = document.getElementById('cartEmpty');
+    const generateBtn = document.getElementById('generateBatchesBtn');
+    const clearCartBtn = document.getElementById('clearCartBtn');
+    const cartCountText = document.getElementById('cartCountText');
+    const messagePreview = document.getElementById('messagePreview');
+    const batchesContainer = document.getElementById('batchesContainer');
+
+    let cart = readCart();
+
+    function renderCart(){
+      cart = readCart();
+      cartContainer.innerHTML = '';
+      if(!cart || cart.length === 0){
+        cartEmpty.style.display = 'block';
+        generateBtn.disabled = true;
+        cartCountText.textContent = '0 items';
+        document.getElementById('summaryItems').textContent = '0';
+        document.getElementById('summarySubtotal').textContent = '$0.00';
+        document.getElementById('summaryTotal').textContent = '$0.00';
+        messagePreview.textContent = 'No checkout started.';
+        batchesContainer.innerHTML = '';
+        return;
+      }
+      cartEmpty.style.display = 'none';
+      generateBtn.disabled = false;
+
+      let totalQty = 0;
+      let subtotal = 0;
+
+      cart.forEach(item=>{
+        totalQty += item.qty;
+        subtotal += item.price * item.qty;
+
+        const el = document.createElement('div');
+        el.className = 'cart-item';
+        el.innerHTML = `
+          <img src="${escapeHtml(item.image || '')}" alt="${escapeHtml(item.title)}">
+          <div style="flex:1">
+            <h3>${escapeHtml(item.title)}</h3>
+            <div class="meta">$${Number(item.price).toFixed(2)} · <small class="muted">ID: ${escapeHtml(item.id)}</small></div>
+            <div class="qty">
+              <button data-action="dec" aria-label="Decrease">−</button>
+              <div style="min-width:28px; text-align:center; font-weight:800">${item.qty}</div>
+              <button data-action="inc" aria-label="Increase">+</button>
+              <button data-action="remove" class="btn" style="color:#b03; margin-left:8px">Remove</button>
+            </div>
+          </div>
+        `;
+        el.querySelector('[data-action="inc"]').addEventListener('click', ()=> {
+          item.qty += 1; writeCart(cart); renderCart();
+        });
+        el.querySelector('[data-action="dec"]').addEventListener('click', ()=> {
+          item.qty = Math.max(1, item.qty - 1); writeCart(cart); renderCart();
+        });
+        el.querySelector('[data-action="remove"]').addEventListener('click', ()=> {
+          cart = cart.filter(c=>c.id !== item.id);
+          writeCart(cart); renderCart();
+        });
+
+        cartContainer.appendChild(el);
+      });
+
+      cartCountText.textContent = `${totalQty} item${totalQty===1?'':'s'}`;
+      document.getElementById('summaryItems').textContent = `${totalQty}`;
+      document.getElementById('summarySubtotal').textContent = `$${subtotal.toFixed(2)}`;
+
+      // crude shipping calc: free over $200 else $8
+      const shipping = subtotal >= 200 ? 0 : (subtotal === 0 ? 0 : 8);
+      document.getElementById('summaryShipping').textContent = `$${shipping.toFixed(2)}`;
+      document.getElementById('summaryTotal').textContent = `$${(subtotal+shipping).toFixed(2)}`;
+
+      // show small message preview (without codes yet)
+      messagePreview.textContent = `Ready to request order. ${totalQty} item${totalQty===1?'':'s'} — total ${(subtotal+shipping).toFixed(2)}. Click "Generate Batch Codes & Checkout" to continue.`;
+    }
+
+    // helpers
+    function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+
+    // Clear cart
+    clearCartBtn.addEventListener('click', ()=>{
+      if(!confirm('Clear your cart?')) return;
+      cart = [];
+      writeCart(cart);
+      renderCart();
+    });
+
+    // Checkout flow: generate codes, ask user for Gmail, compose message, open wa.me
+    const checkoutModal = document.getElementById('checkoutModal');
+    const userGmailInput = document.getElementById('usergmail');
+    const orderNoteInput = document.getElementById('orderNote');
+    const cancelCheckout = document.getElementById('cancelCheckout');
+    const confirmCheckout = document.getElementById('confirmCheckout');
+
+    generateBtn.addEventListener('click', ()=> {
+      // generate batches preview in UI (but not persisted)
+      const batches = generateBatchesForCart();
+      showBatchesInUI(batches);
+      // show modal
+      userGmailInput.value = '';
+      orderNoteInput.value = '';
+      checkoutModal.style.display = 'block';
+      checkoutModal.setAttribute('aria-hidden','false');
+    });
+
+    cancelCheckout.addEventListener('click', ()=> {
+      checkoutModal.style.display = 'none';
+      checkoutModal.setAttribute('aria-hidden','true');
+    });
+
+    confirmCheckout.addEventListener('click', ()=> {
+      const userGmailRaw = userGmailInput.value.trim();
+      const note = orderNoteInput.value.trim();
+      if(!userGmailRaw){
+        alert('Please enter your Gmail address so we can reach you.');
+        userGmailInput.focus();
+        return;
+      }
+      const userGmail = sanitizePhone(userGmailRaw);
+      if(!isValidGmail(userGmail)){
+        
+      }
+
+      if(!OWNER_WHATSAPP || OWNER_WHATSAPP.includes('ENTER_OWNER')) {
+        // owner number not configured — show message and copy to clipboard
+        alert('Owner WhatsApp number not configured in page. Configure OWNER_WHATSAPP in script to enable direct WhatsApp sending. The message will be copied to your clipboard instead.');
+      }
+
+      // generate final batches (fresh)
+      const batches = generateBatchesForCart();
+
+      // compose message
+      const message = composeOrderMessage(batches, userGmail, note);
+      // set message preview
+      messagePreview.textContent = message;
+
+      if(OWNER_WHATSAPP && !OWNER_WHATSAPP.includes('ENTER_OWNER')) {
+        // open WhatsApp to owner with prefilled message
+        const waUrl = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(message)}`;
+        // open in new tab/window; on mobile this opens WhatsApp app
+        window.open(waUrl, '_blank');
+      } else {
+        // fallback: copy to clipboard so owner can be messaged manually
+        copyToClipboard(message).then(()=> {
+          alert('Order message copied to clipboard. Send it to the store owner via WhatsApp or share it.');
+        }).catch(()=> {
+          alert('Unable to copy automatically. Here is the message:\n\n' + message);
+        });
+      }
+
+      // optionally persist order record locally (could be extended to send to Firestore)
+      // For UX, keep cart and optionally clear it after confirmation
+      // clear cart after checkout:
+      cart = [];
+      writeCart(cart);
+      renderCart();
+      checkoutModal.style.display = 'none';
+      checkoutModal.setAttribute('aria-hidden','true');
+    });
+
+    // Generate batches: returns array of { productId, title, qty, codes: [...] , price }
+    function generateBatchesForCart(){
+      const now = Date.now().toString(36).toUpperCase().slice(-6);
+      const batches = cart.map(item => {
+        const prefix = (item.id || item.title || 'ITM').toString().replace(/[^A-Z0-9]/ig,'').slice(0,4).toUpperCase() || 'ITM';
+        const codes = [];
+        for(let i=0;i<item.qty;i++){
+          codes.push(generateCode(prefix, i));
+        }
+        return { productId: item.id, title: item.title, qty: item.qty, price: item.price, codes };
+      });
+      return batches;
+    }
+
+    function showBatchesInUI(batches){
+      batchesContainer.innerHTML = '';
+      if(!batches || !batches.length) return;
+      const title = document.createElement('div');
+      title.style.fontWeight = 800;
+      title.style.marginBottom = '8px';
+      title.textContent = 'Draft Batch Codes';
+      batchesContainer.appendChild(title);
+      batches.forEach(b=>{
+        const div = document.createElement('div');
+        div.className = 'batch';
+        div.innerHTML = `<div>${escapeHtml(b.title)} × ${b.qty}</div><small>${b.codes.join(', ')}</small>`;
+        batchesContainer.appendChild(div);
+      });
+    }
+
+    function composeOrderMessage(batches, userPhone, note){
+      let lines = [];
+      lines.push('Wonder Gallery — New Order');
+      lines.push(`Customer WhatsApp: ${userPhone}`);
+      lines.push('');
+      lines.push('Order details:');
+      batches.forEach(b=>{
+        lines.push(`• ${b.title} × ${b.qty} ${b.codes.join(', ')}`);
+      });
+      const subtotal = batches.reduce((s,b) => s + (b.price * b.qty), 0);
+      const shipping = subtotal >= 200 ? 0 : (subtotal === 0 ? 0 : 8);
+      lines.push('');
+      lines.push(`Subtotal: $${subtotal.toFixed(2)}`);
+      lines.push(`Shipping: $${shipping.toFixed(2)}`);
+      lines.push(`Total: $${(subtotal+shipping).toFixed(2)}`);
+      if(note && note.length) {
+        lines.push('');
+        lines.push('Customer note:');
+        lines.push(note);
+      }
+      lines.push('');
+      lines.push('Please contact the customer on WhatsApp to confirm payment and delivery. Thank you!');
+      return lines.join('\n');
+    }
+
+    // phone sanitization: remove spaces/dashes, keep leading + if present then remove for wa.me param later
+    function sanitizePhone(s){
+      return s.replace(/\s+/g, '').replace(/[-().]/g, '');
+    }
+    function isValidGmail(s){
+    }
+
+    function copyToClipboard(text){
+      if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+      return new Promise((resolve, reject) => {
+        const ta = document.createElement('textarea'); ta.value = text;
+        ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); document.body.removeChild(ta); resolve(); } catch(e){ document.body.removeChild(ta); reject(e); }
+      });
+    }
+
+    // init
+    renderCart();
+
+    // small accessibility: close modal on Escape
+    document.addEventListener('keydown', (e)=> {
+      if(e.key === 'Escape' && checkoutModal.style.display === 'block'){
+        checkoutModal.style.display = 'none';
+        checkoutModal.setAttribute('aria-hidden','true');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact Us — Wonder Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
+  <link rel="shortcut icon" href="https://copilot.microsoft.com/th/id/BCO.42496b11-811c-4285-800b-ad4d42acb4a9.png" type="image/x-icon">
+  <style>
+    /* ========== KEEP NAV/FOOTER APPEARANCE COMPATIBLE ========== */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
+    body { background: linear-gradient(180deg, #eaf7ff, #fff); color: #1a1a1a; overflow-x: hidden; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+
+    /* ========== NAVBAR (left intentionally consistent with existing site) ========== */
+    /* (No changes — site header styles live inside the header block so we don't override them here.) */
+
+    /* ========== ENHANCED CONTACT CONTENT STYLES (scoped) ========== */
+    main.contact-main {
+      max-width: 1100px;
+      margin: 48px auto 80px;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Decorative blobs (subtle, non-intrusive) */
+    .decor-blobs {
+      position: absolute;
+      inset: -60px -10% auto auto;
+      width: 420px;
+      height: 420px;
+      pointer-events: none;
+      filter: blur(28px) saturate(110%);
+      opacity: 0.12;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 20% 30%, #ffd36b 0 18%, transparent 40%),
+        radial-gradient(circle at 80% 70%, #56ccf2 0 18%, transparent 40%),
+        radial-gradient(circle at 60% 10%, #ff8aa1 0 14%, transparent 36%);
+      border-radius: 50%;
+      transform: translate3d(0,0,0);
+      animation: floatBlobs 8s ease-in-out infinite;
+    }
+    @keyframes floatBlobs {
+      0% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    .contact-wrap {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 28px;
+      align-items: start;
+      position: relative;
+    }
+
+    /* Left column: contact + form */
+    .panel {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 12px 36px rgba(12,46,98,0.06);
+      position: relative;
+      z-index: 2;
+    }
+
+    .intro-compact {
+      display:flex; gap:12px; align-items:flex-start;
+    }
+    .intro-compact .title {
+      color: #0077b6;
+      font-weight: 800;
+      font-size: 1.6rem;
+      line-height: 1.05;
+      letter-spacing: -0.4px;
+    }
+    .intro-compact p {
+      color: #144358;
+      margin-top:8px;
+    }
+
+    /* contact methods list */
+    .methods {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .method {
+      background: linear-gradient(180deg,#fff,#f4fdff);
+      border-radius: 12px;
+      padding: 12px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      border: 1px solid rgba(42,109,209,0.06);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .method:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(42,109,209,0.06); }
+    .method .ico {
+      width:46px; height:46px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(90deg, rgba(0,191,255,0.08), rgba(42,109,209,0.06));
+      color:#0077b6; font-weight:700; font-size:20px;
+    }
+    .method .meta { font-size: 0.95rem; color:#08324a; }
+    .method .meta small { display:block; color:#0b5e20; font-size:.82rem; opacity:.85; margin-top:6px; }
+
+    /* Form */
+    form.contact-form {
+      margin-top: 18px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    /* Field wrapper */
+    .field {
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:flex-start;
+      width:100%;
+    }
+
+    .field label {
+      font-size: .95rem;
+      color: #08324a;
+      margin-bottom:4px;
+    }
+
+    /* Input / textarea styles (responsive) */
+    .input-field,
+    .contact-form input[type="text"],
+    .contact-form input[type="email"],
+    .contact-form textarea {
+      width: 100%;
+      padding:12px 14px;
+      border-radius:10px;
+      border:1px solid rgba(8,51,74,0.08);
+      font-size:1rem;
+      outline:none;
+      transition: box-shadow .12s ease, transform .08s ease;
+      background: #eaf7ff;
+    }
+    .contact-form textarea { min-height:110px; resize:vertical; padding-top:12px; }
+
+    .input-field:focus, .contact-form textarea:focus {
+      box-shadow: 0 8px 20px rgba(42,109,209,0.08);
+      transform: translateY(-2px);
+      border-color: rgba(42,109,209,0.18);
+    }
+
+    .form-actions {
+      display:flex; gap:10px; margin-top:6px; align-items:center; flex-wrap:wrap;
+    }
+    .btn-send {
+      background: linear-gradient(90deg,#00bfff,#2a6dd1);
+      color:#fff; padding:10px 16px; border-radius:10px; text-decoration:none; border: none; font-weight:700; cursor:pointer;
+      box-shadow: 0 12px 34px rgba(12,46,98,0.12);
+      transition: transform .12s ease;
+    }
+    .btn-send:hover { transform: translateY(-4px); }
+
+    .btn-ghost {
+      background: transparent; border: 2px solid rgba(42,109,209,0.08); padding: 10px 14px; border-radius:10px; cursor:pointer;
+      color:#0b3954; font-weight:700;
+    }
+
+    .form-note { color:#0b3954; font-size:.92rem; margin-top:8px; opacity:0.9; display:none; }
+
+    /* Right column: quick actions + mini-map */
+    .aside {
+      position: relative;
+      z-index: 2;
+    }
+    .quick {
+      background: linear-gradient(180deg,#fff,#f8feff);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 12px 34px rgba(12,46,98,0.06);
+    }
+    .quick h3 { color:#0077b6; margin-bottom:10px; font-size:1.05rem; }
+    .quick .action {
+      display:flex; gap:10px; align-items:center; padding:10px; border-radius:10px; margin-bottom:10px; cursor:pointer;
+      transition: background .12s ease, transform .12s ease;
+    }
+    .quick .action:hover { background: rgba(0,191,255,0.04); transform: translateY(-4px); }
+    .quick .action .dot { width:40px; height:40px; border-radius:10px; background:#00bfff; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; }
+    .map-embed {
+      margin-top:12px;
+      width:100%;
+      height:220px;
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid rgba(8,51,74,0.06);
+    }
+    .map-embed img { width:100%; height:100%; object-fit:cover; display:block; filter: saturate(.98) contrast(.98); }
+
+    /* small screen layout */
+    @media (max-width:980px) {
+      .contact-wrap { grid-template-columns: 1fr; }
+      .decor-blobs { display:none; }
+      .intro-compact .title { font-size: 1.4rem; }
+      .aside { order: 2; }
+      .panel { order: 1; padding:20px; }
+      main.contact-main { margin: 18px auto 60px; padding: 0 16px; }
+      .quick { padding: 12px; }
+      .map-embed { height:180px; }
+      .contact-wrap { gap: 18px; }
+    }
+
+    /* extra small screens */
+    @media (max-width:480px) {
+      header { padding:8px 12px; }
+      .intro-compact .title { font-size: 1.15rem; }
+      .methods { gap: 8px; }
+      .method .ico { width:40px; height:40px; font-size:18px; }
+      .panel { padding:16px; border-radius:12px; }
+      .quick { padding:12px; }
+      .map-embed { height:150px; }
+      .btn-send { padding:10px 12px; }
+    }
+
+    /* reduced motion consideration */
+    @media (prefers-reduced-motion: reduce) {
+      .decor-blobs { animation: none; transform:none; }
+      * { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR (kept exact shape/markup as original — header styles preserved by inline style below) -->
+  <header role="banner" aria-label="Site header" style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:linear-gradient(90deg,#00bfff,#0077b6);box-shadow:0 6px 20px rgba(0,119,182,0.12);border-bottom-left-radius:12px;border-bottom-right-radius:12px;">
+  <!-- Brand -->
+  <div style="display:flex;align-items:center;gap:.6rem;color:#fff;font-weight:900;font-size:1.05rem;letter-spacing:.4px;">
+    <span>Wonder Gallery</span>
+  </div>
+
+  <!-- Navigation actions -->
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div style="position:relative;">
+      <!-- Menu toggle -->
+      <button id="wg-menuToggle" aria-controls="wg-siteMenu" aria-expanded="false" aria-haspopup="true" title="Open menu"
+        style="border: none;background:#148bc5;color:inherit;cursor:pointer;padding:8px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;color:#fff;">
+        <!-- Simple accessible icon (use your icon font if available) -->
+        <span aria-hidden="true" style="font-size:20px;line-height:1;">☰</span>
+        <!-- screen-reader-only text -->
+        <span style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Open menu</span>
+      </button>
+
+      <!-- Flyout menu -->
+      <nav id="wg-siteMenu" role="navigation" aria-label="Main menu" aria-hidden="true"
+        style="position:absolute;right:-25px;top:64px;min-width:220px;background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.95));border-radius:10px;box-shadow:0 10px 35px rgba(0,0,0,0.18);overflow:hidden;backdrop-filter:blur(6px);display:none;">
+        <a href="https://wondergallery.github.io/wondergallery/main-page/" style="display:block;padding:12px 14px;text-decoration:none;color:#0077b6;font-weight:600;">Home</a>
+        <a href="https://wondergallery.github.io/wondergallery/about-us/" style="display:block;padding:12px 14px;text-decoration:none;color:#0077b6;font-weight:600;">About Us</a>
+        <a href="https://wondergallery.github.io/wondergallery/collection/" style="display:block;padding:12px 14px;text-decoration:none;color:#0077b6;font-weight:600;">Collections</a>
+        <a href="https://wondergallery.github.io/wondergallery/contact/" style="display:block;padding:12px 14px;text-decoration:none;color:#0077b6;font-weight:600;">Contact</a>
+        <a href="https://wondergallery.github.io/wondergallery/rate-us/" style="display:block;padding:12px 14px;text-decoration:none;color:#0077b6;font-weight:600;">Rate Us</a>
+      </nav>
+    </div>
+
+    <!-- Primary CTA -->
+    <a href="https://wondergallery.github.io/wondergallery/collection/" title="View collection"
+      style="background:linear-gradient(90deg,#00bfff,#2a6dd1);color:#fff;padding:12px 18px;border-radius:10px;font-weight:700;text-decoration:none;box-shadow:0 8px 28px rgba(12,46,98,0.3);">
+      View Collection
+    </a>
+  </div>
+</header>
+
+<!-- Keep the same menu toggle script (no changes to behavior) -->
+<script>
+(function(){
+  var btn = document.getElementById('wg-menuToggle');
+  var menu = document.getElementById('wg-siteMenu');
+
+  if(!btn || !menu) return;
+
+  function openMenu(){
+    btn.setAttribute('aria-expanded','true');
+    menu.setAttribute('aria-hidden','false');
+    menu.style.display = 'block';
+    // focus first link for keyboard users
+    var firstLink = menu.querySelector('a');
+    if(firstLink) firstLink.focus();
+  }
+  function closeMenu(){
+    btn.setAttribute('aria-expanded','false');
+    menu.setAttribute('aria-hidden','true');
+    menu.style.display = 'none';
+  }
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var isOpen = btn.getAttribute('aria-expanded') === 'true';
+    if(isOpen) closeMenu(); else openMenu();
+  });
+
+  // close on outside click
+  document.addEventListener('click', function(e){
+    if(!menu.contains(e.target) && e.target !== btn) closeMenu();
+  });
+
+  // close on Escape
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' || e.key === 'Esc') closeMenu();
+  });
+
+  // ensure menu starts closed
+  document.addEventListener('DOMContentLoaded', function(){ closeMenu(); });
+})();
+</script>
+
+<!-- ========== ENHANCED CONTACT LAYOUT (only main content changed) ========== -->
+<main class="contact-main" role="main" aria-label="Contact content">
+  <div class="decor-blobs" aria-hidden="true"></div>
+
+  <div class="contact-wrap" role="region" aria-label="Contact and quick actions">
+    <!-- LEFT: Contact + Form -->
+    <div class="panel" aria-labelledby="contactHeading">
+      <div class="intro-compact">
+        <div>
+          <div class="title" id="contactHeading">Contact Us — we'd love to help</div>
+          <p>Fast replies. Friendly support. Send a quick message or use the quick actions on the right.</p>
+        </div>
+      </div>
+
+      <div class="methods" aria-hidden="false" aria-label="Contact methods">
+        <div class="method" role="group" aria-label="Email">
+          <div class="ico">@</div>
+          <div class="meta">
+            <strong>wondergallery2003@gmail.com</strong>
+            <small>Email us anytime — typical reply within 24 hours</small>
+          </div>
+        </div>
+
+        <div class="method" role="group" aria-label="Phone">
+          <div class="ico">📞</div>
+          <div class="meta">
+            <strong>+880 17105 40657</strong>
+            <small>Calls & WhatsApp (9:00 — 19:00)</small>
+          </div>
+        </div>
+
+        <div class="method" role="group" aria-label="Social">
+          <div class="ico">★</div>
+          <div class="meta">
+            <strong>@wondergallery2</strong>
+            <small>Twitter</small>
+          </div>
+        </div>
+
+        <div class="method" role="group" aria-label="Social">
+          <div class="ico">★</div>
+          <div class="meta">
+            <strong>@wondergallery_2025</strong>
+            <small>Instagram</small>
+          </div>
+        </div>
+
+        <div class="method" role="group" aria-label="Social">
+          <div class="ico">★</div>
+          <div class="meta">
+            <strong>@wondergallery</strong>
+            <small>Facebook</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- modify this form HTML and place wherever you want your form -->
+<form
+  id="contactForm"
+  action="https://formspree.io/f/mdaknzjz"
+  method="POST"
+  class="contact-form"
+  novalidate aria-label="Contact form"
+>
+  <div class="field">
+    <label for="name">Your name:</label>
+    <input id="name" type="text" name="name" class="input-field" autocomplete="name" placeholder="Jane Doe">
+  </div>
+
+  <div class="field">
+    <label for="email">Your email:</label>
+    <input id="email" type="email" name="email" class="input-field" autocomplete="email" placeholder="you@example.com">
+  </div>
+
+  <div class="field">
+    <label for="message">Your message:</label>
+    <textarea id="message" name="message" class="input-field" placeholder="Tell us how we can help..."></textarea>
+  </div>
+
+  <div class="form-actions" aria-hidden="false">
+    <button type="submit" class="btn-send" aria-label="Send message">Send</button>
+    <button type="button" id="clearBtn" class="btn-ghost" aria-label="Clear form">Clear</button>
+    <div id="formNote" class="form-note" role="status" aria-live="polite" style="display:none;"></div>
+  </div>
+</form>
+
+    </div>
+
+    <!-- RIGHT: Quick actions + mini map -->
+    <aside class="aside" aria-labelledby="quickActionsHeading">
+      <div class="quick" role="region" aria-label="Quick actions panel">
+        <h3 id="quickActionsHeading">Quick Actions</h3>
+
+        <div class="action" role="button" tabindex="0" id="whatsappAction" aria-pressed="false">
+          <div class="dot">WA</div>
+          <div>
+            <strong>Chat on WhatsApp</strong>
+            <div style="color:#0b5e20;font-size:.9rem;margin-top:4px">Fastest way for quick Q&A</div>
+          </div>
+        </div>
+
+        <div class="action" role="button" tabindex="0" id="callAction" aria-pressed="false">
+          <div class="dot">☎</div>
+          <div>
+            <strong>Request a call</strong>
+            <div style="color:#0b5e20;font-size:.9rem;margin-top:4px">We'll call you during office hours</div>
+          </div>
+        </div>
+
+        <div class="map-embed" aria-hidden="false" role="img" aria-label="Company location preview">
+          <!-- lightweight static map preview: replace with an iframe/map if desired -->
+          <img src="https://i.postimg.cc/k5WvY28H/G.png" alt="Wonder Gallery location preview (placeholder)" loading="lazy" />
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<!-- ========== KEEP THE ORIGINAL FOOTER EXACTLY AS-IS (user requested no changes) ========== -->
+<footer role="contentinfo" aria-label="Site footer" style="background:linear-gradient(90deg,#00bfff,#2a6dd1);color:#fff;padding:28px 16px;border-radius:18px 18px 0 0;margin-top:24px;font-family: 'Poppins', Arial, sans-serif;">
+  <div style="max-width:1100px;margin:0 auto;display:flex;gap:20px;justify-content:space-around;flex-wrap:wrap;">
+    <!-- About / Brand -->
+    <div style="max-width:320px;flex:1 1 240px;">
+      <strong style="display:block;font-size:1.05rem">Wonder Gallery</strong>
+      <p style="margin:.4rem 0 0;color:rgba(255,255,255,0.95);">Where art, sound, and imagination come together. Explore creativity and color with us every day 🎨</p>
+    </div>
+
+    <!-- Quick Links -->
+    <div style="flex:1 1 160px;">
+      <strong>Quick Links</strong>
+      <div style="margin-top:8px;line-height:1.8;">
+        <a href="https://wondergallery.github.io/wondergallery/main-page/" style="color:rgba(255,255,255,0.95);text-decoration:none;display:block;">Home</a>
+        <a href="https://wondergallery.github.io/wondergallery/about-us/" style="color:rgba(255,255,255,0.95);text-decoration:none;display:block;">About</a>
+        <a href="https://wondergallery.github.io/wondergallery/contact/" style="color:rgba(255,255,255,0.95);text-decoration:none;display:block;">Contact</a>
+      </div>
+    </div>
+
+    <!-- Social / Follow -->
+    <div style="flex:1 1 160px;">
+      <strong>Follow Us</strong>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <a href="https://www.facebook.com/share/1BhzdGrJj4/" aria-label="Facebook" style="display:inline-block">
+          <img alt="Facebook" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/733/733547.png" width="28" height="28" style="display:block;border:0;">
+        </a>
+        <a href="https://www.instagram.com/wondergallery_2025?igsh=ODNzbWRoZHFrMnEx" aria-label="Instagram" style="display:inline-block">
+          <img alt="Instagram" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/733/733558.png" width="28" height="28" style="display:block;border:0;">
+        </a>
+        <a href="https://x.com/wondergallery2" aria-label="Twitter" style="display:inline-block">
+          <img alt="Twitter" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/733/733579.png" width="28" height="28" style="display:block;border:0;">
+        </a>
+        <a href="https://www.youtube.com/@wondergallery-2003" aria-label="YouTube" style="display:inline-block">
+          <img alt="YouTube" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="28" height="28" style="display:block;border:0;">
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1100px;margin:14px auto 0;border-top:1px solid rgba(255,255,255,0.12);padding-top:12px;text-align:center;color:rgba(255,255,255,0.95);">
+    <small>© 2025 Wonder Gallery | All Rights Reserved 💙</small>
+  </div>
+</footer>
+
+<!-- ========== Interactions (small, local JS only) ========== -->
+<script>
+(function(){
+  // Form handling (client-side only; no network calls)
+  const form = document.getElementById('contactForm');
+  const note = document.getElementById('formNote');
+  const clearBtn = document.getElementById('clearBtn');
+
+  function showNote(text, success){
+    if(!note) return;
+    note.textContent = text;
+    note.style.display = 'block';
+    note.style.color = success ? '#0b5e20' : '#b32a2a';
+    setTimeout(()=> { note.style.display = 'none'; }, 4500);
+  }
+
+  if(form){
+    form.addEventListener('submit', function(e){
+      // Allow real network submission to formspree if JS not preventing
+      // But we simulate immediate client-side validation first
+      e.preventDefault();
+      const name = (form.querySelector('[name="name"]') || {}).value?.trim();
+      const email = (form.querySelector('[name="email"]') || {}).value?.trim();
+      const message = (form.querySelector('[name="message"]') || {}).value?.trim();
+
+      if(!name || !email || !message){
+        showNote('Please complete all fields before sending.', false);
+        return;
+      }
+
+      // Very small email pattern check
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if(!emailPattern.test(email)){
+        showNote('Please provide a valid email address.', false);
+        return;
+      }
+
+      // If you want to actually POST to Formspree: uncomment below and remove the simulated send.
+      // form.submit();
+
+      // Simulate send
+      showNote('Thanks — your message looks good! We will reply soon.', true);
+      form.reset();
+    });
+  }
+
+  if(clearBtn && form){
+    clearBtn.addEventListener('click', function(){
+      form.reset();
+      showNote('Form cleared.', true);
+    });
+  }
+
+  // Quick actions (open relevant links)
+  const whatsappAction = document.getElementById('whatsappAction');
+  const callAction = document.getElementById('callAction');
+
+  if(whatsappAction) whatsappAction.addEventListener('click', ()=> {
+    // open WhatsApp chat (web or app)
+    window.open('https://wa.me/8801710540657', '_blank', 'noopener');
+  });
+  if(callAction) callAction.addEventListener('click', ()=> {
+    // trigger tel
+    window.location.href = 'tel:+8801710540657';
+  });
+
+  // keyboard support for action items
+  [whatsappAction, callAction].forEach(el => {
+    if(!el) return;
+    el.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

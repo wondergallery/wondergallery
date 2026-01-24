@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rate Us — Wonder Gallery</title>
+  <link rel="shortcut icon" href="https://copilot.microsoft.com/th/id/BCO.39612a2f-d835-4a35-bd00-dabe7878ba2d.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
+  <style>
+    /* Keep global header/footer appearance untouched — scoped styles only for main content */
+    :root{
+      --accent1: #00bfff;
+      --accent2: #2a6dd1;
+      --bg-start: #f7fdff;
+      --bg-end: #ffffff;
+      --card-shadow: 0 12px 34px rgba(12,46,98,0.08);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(180deg, #eaf7ff, #fff);
+      color: #07233a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Main layout */
+    main.rate-main {
+      max-width: 1100px;
+      margin: 60px auto 120px;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Subtle background decor (non-invasive) */
+    .decor {
+      position: absolute;
+      inset: auto -6% -40% auto;
+      width: 520px;
+      height: 520px;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,138,161,0.12), transparent 18%),
+        radial-gradient(circle at 80% 80%, rgba(86,204,255,0.10), transparent 18%);
+      border-radius: 50%;
+      filter: blur(28px);
+      z-index: 0;
+      transform: translate3d(0,0,0);
+    }
+
+    /* Hero */
+    .rate-hero {
+      background: linear-gradient(180deg,var(--bg-start),var(--bg-end));
+      border-radius: 18px;
+      padding: 48px 28px;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: visible;
+      margin-bottom: 28px;
+    }
+    .rate-hero .kicker { color: var(--accent1); font-weight: 700; margin-bottom: 8px; display:block; }
+    .rate-hero h1 {
+      margin: 6px 0 12px;
+      font-size: clamp(2rem, 5vw, 4.8rem);
+      line-height: 0.9;
+      letter-spacing: -1px;
+      font-weight: 900;
+      color: #08324a;
+    }
+    .rate-hero h1 .spark {
+      background: linear-gradient(90deg,#ffd36b,#ff8aa1,#7ed6ff,#56ccf2);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display:inline-block;
+      animation: shimmer 6s linear infinite;
+    }
+    @keyframes shimmer {
+      0%{ background-position:0% 50% }
+      50%{ background-position:100% 50% }
+      100%{ background-position:0% 50% }
+    }
+    .rate-hero p.lead { color:#114a66; font-size:1.05rem; margin:0 auto; max-width:820px; }
+
+    /* Rating card */
+    .rate-card {
+      margin-top: 20px;
+      background: linear-gradient(180deg,#ffffff,#f4fbff);
+      border-radius: 18px;
+      padding: 26px;
+      box-shadow: var(--card-shadow);
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 20px;
+      align-items: center;
+    }
+
+    /* Left column: interactive rating */
+    .rating-left { padding: 6px 8px; }
+    .stars {
+      display:flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 6px 0 12px;
+    }
+    .star-btn {
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-size: 44px;
+      line-height: 1;
+      color: #cfd8dc;
+      transition: transform .12s ease, color .12s ease, filter .12s ease;
+      filter: drop-shadow(0 6px 18px rgba(42,109,209,0.06));
+    }
+    .star-btn:hover { transform: translateY(-6px) scale(1.06); color: #ffd166; }
+    .star-btn.active { color: #ffb74d; text-shadow: 0 6px 20px rgba(255,183,77,0.12); }
+
+    .rating-note { text-align:center; color:#0b3954; font-weight:700; margin-top:8px; }
+
+    .rating-actions { display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+    .btn {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .btn-primary { background: linear-gradient(90deg,var(--accent1),var(--accent2)); color: #fff; box-shadow: 0 10px 30px rgba(12,46,98,0.12); }
+    .btn-secondary { background: transparent; border: 2px solid rgba(42,109,209,0.08); color: #08324a; }
+
+    .thanks {
+      margin-top: 12px;
+      text-align:center;
+      color: #0b5e20;
+      font-weight: 700;
+      display:none;
+    }
+
+    /* Right column: embed + quick choices */
+    .rating-right {
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .quick-actions {
+      display:flex;
+      gap:10px;
+      justify-content:space-between;
+    }
+    .quick-card {
+      background: linear-gradient(180deg,#fff,#f7fdff);
+      border-radius: 12px;
+      padding: 10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border: 1px solid rgba(42,109,209,0.06);
+    }
+    .quick-card .label { font-weight:700; color:#0077b6; }
+    .iframe-wrap {
+      margin-top: 6px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(8,51,74,0.06);
+      height: 210px;
+      background: linear-gradient(180deg,#fff,#f2fbff);
+    }
+    .iframe-wrap iframe { width:100%; height:100%; border:0; }
+
+    /* subtle confetti (small particles) */
+    .confetti {
+      position: absolute;
+      inset: auto 10% auto auto;
+      width: 220px;
+      height: 140px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    .confetti.active { opacity: 1; }
+
+    /* Responsive */
+    @media (max-width:920px) {
+      .rate-card { grid-template-columns: 1fr; }
+      .iframe-wrap { height:180px; }
+      .decor { display:none; }
+      .confetti { display:none; }
+      .rate-hero h1 { font-size: clamp(2rem, 12vw, 3.6rem); }
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .rate-hero .spark, .decor { animation: none; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <header role="banner" aria-label="Site header" style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:linear-gradient(90deg,#00bfff,#0077b6);box-shadow:0 6px 20px rgba(0,119,182,0.12);border-bottom-left-radius:12px;border-bottom-right-radius:12px;">
+  <!-- Brand -->
+  <div style="display:flex;align-items:center;gap:.6rem;color:#fff;font-weight:900;font-size:1.05rem;letter-spacing:.4px;">
+    <span>Wonder Gallery</span>
+  </div>
+
+  <!-- Navigation actions -->
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div style="position:relative;">
+      <!-- Menu toggle -->
+      <button id="wg-menuToggle" aria-controls="wg-siteMenu" aria-expanded="false" aria-haspopup="true" title="Open menu"
+        style="border:0;background:#148bc5;color:inherit;cursor:pointer;padding:8px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:rgba(255,255,255,0.08);color:#fff;">
+        <!-- Simple accessible icon (use your icon font if available) -->
+        <span aria-hidden="true" style="font-size:20px;line-height:1;">☰</span>
+        <!-- screen-reader-only text -->
+        <span style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Open menu</span>
+      </button>
+
+      <!-- Flyout menu -->
+      <nav id="wg-siteMenu" role="navigation" aria-label="Main menu" aria-hidden="true"
+        style="position:absolute;right:-25px;top:64px;min-width:220px;background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.95));border-radius:10px;box-shadow:0 10px 35px rgba(0,0,0,0.18);overflow:hidden;backdrop-filter:blur(6px);display:none;">
+        <a href="https://wondergallery.github.io/wondergallery/main-page/" style="display:block;padding:12px 14px;text-decoration:none;color:#0077b6;font-weight:600;">Home</a>
+        <a href="https://wondergallery.github.io/wondergallery/about-us/" style="display:block;padding:12px 14px;text-decoration:none;color:#0077b6;font-weight:600;">About Us</a>
+        <a href="https://wondergallery.github.io/wondergallery/collection/" style="display:block;padding:12px 14px;text-decoration:none;color:#0077b6;font-weight:600;">Collections</a>
+        <a href="https://wondergallery.github.io/wondergallery/contact/" style="display:block;padding:12px 14px;text-decoration:none;color:#0077b6;font-weight:600;">Contact</a>
+        <a href="https://wondergallery.github.io/wondergallery/rate-us/" style="display:block;padding:12px 14px;text-decoration:none;color:#0077b6;font-weight:600;">Rate Us</a>
+      </nav>
+    </div>
+
+    <!-- Primary CTA -->
+    <a href="https://wondergallery.github.io/wondergallery/collection/" title="View collection"
+      style="background:linear-gradient(90deg,#00bfff,#2a6dd1);color:#fff;padding:12px 18px;border-radius:10px;font-weight:700;text-decoration:none;box-shadow:0 8px 28px rgba(12,46,98,0.3);">
+      View Collection
+    </a>
+  </div>
+</header>
+
+<!-- Minimal JS to toggle menu, close on outside click and Escape, and focus first link when opened -->
+<script>
+(function(){
+  var btn = document.getElementById('wg-menuToggle');
+  var menu = document.getElementById('wg-siteMenu');
+
+  if(!btn || !menu) return;
+
+  function openMenu(){
+    btn.setAttribute('aria-expanded','true');
+    menu.setAttribute('aria-hidden','false');
+    menu.style.display = 'block';
+    // focus first link for keyboard users
+    var firstLink = menu.querySelector('a');
+    if(firstLink) firstLink.focus();
+  }
+  function closeMenu(){
+    btn.setAttribute('aria-expanded','false');
+    menu.setAttribute('aria-hidden','true');
+    menu.style.display = 'none';
+  }
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var isOpen = btn.getAttribute('aria-expanded') === 'true';
+    if(isOpen) closeMenu(); else openMenu();
+  });
+
+  // close on outside click
+  document.addEventListener('click', function(e){
+    if(!menu.contains(e.target) && e.target !== btn) closeMenu();
+  });
+
+  // close on Escape
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' || e.key === 'Esc') closeMenu();
+  });
+
+  // ensure menu starts closed
+  document.addEventListener('DOMContentLoaded', function(){ closeMenu(); });
+})();
+</script>
+
+<main class="rate-main" role="main" aria-label="Rate Wonder Gallery">
+  <div class="decor" aria-hidden="true"></div>
+
+  <section class="rate-hero" aria-labelledby="rateHeading">
+    <span class="kicker">We value your voice</span>
+    <h1 id="rateHeading"><span class="spark">Rate</span> Us</h1>
+    <p class="lead">Tell us how we did — a quick star rating helps us improve. Leave a short note or open the detailed feedback form below.</p>
+  </section>
+
+  <section class="rate-card" aria-labelledby="cardHeading">
+    <div class="rating-left" aria-hidden="false">
+      <h2 id="cardHeading" style="text-align:center;color:#0077b6;margin:0 0 6px;">Quick Rating</h2>
+
+      <div class="stars" role="radiogroup" aria-label="Star rating">
+        <button class="star-btn" data-value="1" aria-label="1 star" role="radio" aria-checked="false">☆</button>
+        <button class="star-btn" data-value="2" aria-label="2 stars" role="radio" aria-checked="false">☆</button>
+        <button class="star-btn" data-value="3" aria-label="3 stars" role="radio" aria-checked="false">☆</button>
+        <button class="star-btn" data-value="4" aria-label="4 stars" role="radio" aria-checked="false">☆</button>
+        <button class="star-btn" data-value="5" aria-label="5 stars" role="radio" aria-checked="false">☆</button>
+      </div>
+
+      <div class="rating-note" id="ratingNote">Tap a star to rate — thank you!</div>
+
+      <div class="rating-actions" aria-hidden="false">
+        <button class="btn btn-primary" id="submitRating">Submit Rating</button>
+        <button class="btn btn-secondary" id="openForm">Open Detailed Form</button>
+      </div>
+
+      <div class="thanks" id="thanksMsg" role="status" aria-live="polite">Thanks — your feedback helps a lot! 💙</div>
+    </div>
+
+    <div class="rating-right" aria-hidden="false">
+      <div class="quick-actions" aria-hidden="false">
+        <div class="quick-card" title="Rate quickly on app/web">
+          <div style="font-size:20px;color:var(--accent2)">★</div>
+          <div>
+            <div class="label">Quick Rate</div>
+            <div style="font-size:.9rem;color:#0b3954">Submit your star rating in one tap</div>
+          </div>
+        </div>
+
+        <div class="quick-card" title="Detailed feedback form">
+          <div style="font-size:20px;color:var(--accent2)">✉</div>
+          <div>
+            <div class="label">Detailed Feedback</div>
+            <div style="font-size:.9rem;color:#0b3954">Open our Google Form for more details</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="iframe-wrap" id="formWrapper" aria-hidden="true" style="display:none;">
+        <!-- Keep the same form source as original but load only when requested -->
+        <iframe id="feedbackIframe" src="" title="Detailed feedback form" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+
+    <div class="confetti" id="confettiArea" aria-hidden="true"></div>
+  </section>
+</main>
+
+<!-- KEEP THE ORIGINAL FOOTER EXACTLY AS-IS (user requested no changes) -->
+<footer role="contentinfo" aria-label="Site footer" style="background:linear-gradient(90deg,#00bfff,#2a6dd1);color:#fff;padding:28px 16px;border-radius:18px 18px 0 0;margin-top:24px;font-family: 'Poppins', Arial, sans-serif;">
+  <div style="max-width:1100px;margin:0 auto;display:flex;gap:20px;justify-content:space-around;flex-wrap:wrap;margin-left: 90px;">
+    <!-- About / Brand -->
+    <div style="max-width:320px;">
+      <strong style="display:block;font-size:1.05rem">Wonder Gallery</strong>
+      <p style="margin:.4rem 0 0;color:rgba(255,255,255,0.95);">Where art, sound, and imagination come together. Explore creativity and color with us every day 🎨</p>
+    </div>
+
+    <!-- Quick Links -->
+    <div style="flex:1 1 160px; margin-left: 50px;">
+      <strong>Quick Links</strong>
+      <div style="margin-top:8px;line-height:1.8;">
+        <a href="https://wondergallery.github.io/wondergallery/main-page/" style="color:rgba(255,255,255,0.95);text-decoration:none;display:block;">Home</a>
+        <a href="https://wondergallery.github.io/wondergallery/about-us/" style="color:rgba(255,255,255,0.95);text-decoration:none;display:block;">About</a>
+        <a href="https://wondergallery.github.io/wondergallery/contact/" style="color:rgba(255,255,255,0.95);text-decoration:none;display:block;">Contact</a>
+      </div>
+    </div>
+
+    <!-- Social / Follow -->
+    <div style="flex:1 1 160px;margin-left: 20px;">
+      <strong style="margin-left: 30px;">Follow Us</strong>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <a href="https://facebook.com/wondergallery" aria-label="Facebook" style="display:inline-block">
+          <img alt="Facebook" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/733/733547.png" width="28" height="28" style="display:block;border:0;">
+        </a>
+        <a href="https://instagram.com/wondergallery" aria-label="Instagram" style="display:inline-block">
+          <img alt="Instagram" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/733/733558.png" width="28" height="28" style="display:block;border:0;">
+        </a>
+        <a href="https://twitter.com/wondergallery" aria-label="Twitter" style="display:inline-block">
+          <img alt="Twitter" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/733/733579.png" width="28" height="28" style="display:block;border:0;">
+        </a>
+        <a href="https://www.youtube.com/@wondergallery-2003" aria-label="YouTube" style="display:inline-block">
+          <img alt="YouTube" loading="lazy" src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="28" height="28" style="display:block;border:0;">
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1100px;margin:14px auto 0;border-top:1px solid rgba(255,255,255,0.12);padding-top:12px;text-align:center;color:rgba(255,255,255,0.95);">
+    <small>© 2025 Wonder Gallery | All Rights Reserved 💙</small>
+  </div>
+</footer>
+
+<!-- Local interactions: star rating, reveal iframe, lightweight confetti -->
+<script>
+(function(){
+  const stars = Array.from(document.querySelectorAll('.star-btn'));
+  const note = document.getElementById('ratingNote');
+  const submitBtn = document.getElementById('submitRating');
+  const openFormBtn = document.getElementById('openForm');
+  const thanks = document.getElementById('thanksMsg');
+  const formWrapper = document.getElementById('formWrapper');
+  const feedbackIframe = document.getElementById('feedbackIframe');
+  const confetti = document.getElementById('confettiArea');
+
+  let current = 0;
+
+  function setActive(n){
+    current = n;
+    stars.forEach((s, i) => {
+      const val = i+1;
+      if(val <= n){ s.classList.add('active'); s.setAttribute('aria-checked','true'); s.textContent = '★'; }
+      else { s.classList.remove('active'); s.setAttribute('aria-checked','false'); s.textContent = '☆'; }
+    });
+    note.textContent = current ? `You selected ${current} star${current>1?'s':''}` : 'Tap a star to rate — thank you!';
+  }
+
+  // hover preview
+  stars.forEach((s, i) => {
+    const val = i+1;
+    s.addEventListener('mouseenter', ()=> {
+      stars.forEach((x,j)=>{
+        if(j <= i){ x.textContent = '★'; x.style.color = '#ffd166'; }
+        else { x.textContent = '☆'; x.style.color = ''; }
+      });
+    });
+    s.addEventListener('mouseleave', ()=> {
+      setActive(current);
+      stars.forEach(x => x.style.color = '');
+    });
+
+    s.addEventListener('click', ()=> {
+      setActive(val);
+    });
+
+    // keyboard accessibility
+    s.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); s.click(); }
+      if(e.key === 'ArrowRight'){ const next = Math.min(5, (current||val) + 1); setActive(next); }
+      if(e.key === 'ArrowLeft'){ const prev = Math.max(1, (current||val) - 1); setActive(prev); }
+    });
+  });
+
+  // Submit rating (local simulation)
+  submitBtn.addEventListener('click', ()=> {
+    if(!current){
+      note.textContent = 'Please select a star rating first.';
+      note.style.color = '#b32a2a';
+      setTimeout(()=> { note.style.color = ''; note.textContent = 'Tap a star to rate — thank you!'; }, 2500);
+      return;
+    }
+
+    // show thanks, play confetti animation
+    thanks.style.display = 'block';
+    triggerConfetti();
+    // optionally suggest detailed feedback
+    setTimeout(()=> {
+      if(confirm('Thanks for your rating! Would you like to leave more detailed feedback?')){
+        openForm();
+      }
+    }, 800);
+  });
+
+  // Open the embedded Google Form only on demand to avoid heavy load
+  function openForm(){
+    if(formWrapper.style.display === 'none' || formWrapper.style.display === ''){
+      // set the iframe src (original link used by user)
+      feedbackIframe.src = 'https://docs.google.com/forms/d/e/1FAIpQLSfArTNg24SPDCKPYSTwIhfh58uney4I3jgefRZaehBsm5KvAQ/viewform?usp=header';
+      formWrapper.style.display = 'block';
+      formWrapper.setAttribute('aria-hidden','false');
+      // scroll into view smoothly
+      formWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      formWrapper.style.display = 'none';
+      formWrapper.setAttribute('aria-hidden','true');
+    }
+  }
+
+  openFormBtn.addEventListener('click', openForm);
+
+  // lightweight confetti: create a few small colored dots that fade
+  function triggerConfetti(){
+    if(!confetti) return;
+    confetti.classList.add('active');
+    confetti.innerHTML = '';
+    const colors = ['#ffd36b','#ff8aa1','#7ed6ff','#56ccf2','#b9f6ca'];
+    for(let i=0;i<18;i++){
+      const dot = document.createElement('div');
+      const size = Math.floor(Math.random()*7)+6;
+      dot.style.width = size+'px';
+      dot.style.height = size+'px';
+      dot.style.borderRadius = '50%';
+      dot.style.background = colors[Math.floor(Math.random()*colors.length)];
+      dot.style.position = 'absolute';
+      dot.style.left = (Math.random()*80)+'%';
+      dot.style.top = (Math.random()*60)+'%';
+      dot.style.opacity = '0';
+      dot.style.transform = 'translateY(0) scale(0.6)';
+      dot.style.transition = 'transform .9s cubic-bezier(.2,.9,.2,1), opacity .9s ease';
+      confetti.appendChild(dot);
+      // animate
+      requestAnimationFrame(()=>{
+        dot.style.opacity = '1';
+        dot.style.transform = `translateY(${ -30 - Math.random()*120 }px) scale(1)`;
+      });
+      // fade out later
+      setTimeout(()=> {
+        dot.style.opacity = '0';
+      }, 900);
+    }
+    // clear after animation
+    setTimeout(()=> {
+      confetti.classList.remove('active');
+      confetti.innerHTML = '';
+    }, 1400);
+  }
+
+  // small accessibility improvement: if user presses Enter on the page with no rating, focus stars
+  document.addEventListener('keydown', (e)=>{
+    if((e.key === 'Enter' || e.key === ' ') && document.activeElement === document.body){
+      // focus the first star
+      const s0 = stars[0];
+      if(s0) s0.focus();
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>

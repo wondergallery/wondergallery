@@ -1,0 +1,871 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Wonder Gallery — Admin</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    /* ===========================
+       Wonder Gallery — Black Edition (Ultimate UI)
+       Upgraded CSS: live animations, micro-interactions,
+       improved accessibility (prefers-reduced-motion),
+       image shimmer placeholders, staggered grid entrance,
+       polished glass/neon styling.
+       =========================== */
+
+    :root{
+      /* palette */
+      --bg-900: #06060a;
+      --bg-800: #0b0c0f;
+      --card: rgba(255,255,255,0.03);
+      --muted: #98a4b5;
+      --text: #eaf4ff;
+      --accent-1: #7c5cff;
+      --accent-2: #00e0a1;
+      --accent-3: #5fb7ff;
+      --glass: rgba(255,255,255,0.028);
+      --glass-2: rgba(255,255,255,0.02);
+      --radius: 14px;
+      --glass-border: rgba(255,255,255,0.04);
+      --elev: 0 10px 40px rgba(2,6,23,0.65);
+      --speed-fast: 160ms;
+      --speed-mid: 260ms;
+      --speed-slow: 520ms;
+      --sentence-delay: 50ms;
+    }
+
+    /* reset + base */
+    * { box-sizing: border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+    html,body { height:100%; margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: radial-gradient(1200px 600px at 10% 10%, rgba(124,92,255,0.06), transparent), linear-gradient(180deg, var(--bg-900) 0%, var(--bg-800) 100%); color:var(--text); -webkit-tap-highlight-color: transparent; }
+    body { padding:28px; display:flex; flex-direction:column; gap:18px; min-height:100vh; }
+
+    /* respects user motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+    }
+
+    /* global helpers */
+    .hidden { display:none !important; opacity:0; pointer-events:none; }
+    .muted { color:var(--muted); font-size:13px; }
+    .badge { font-size:11px; color:var(--muted); background:var(--glass-2); padding:6px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.02); display:inline-flex; align-items:center; }
+
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; position:relative; z-index:2; }
+    h1 { margin:0; font-size:20px; letter-spacing:0.6px; color:var(--text); display:flex; align-items:center; gap:12px }
+    .subtitle { color:var(--muted); font-size:13px; margin-top:2px; }
+
+    .logo {
+      width:48px; height:48px; border-radius:12px;
+      background: linear-gradient(135deg,var(--accent-1),var(--accent-2));
+      display:inline-grid; place-items:center; font-weight:800; color:white; box-shadow: 0 8px 36px rgba(124,92,255,0.14);
+      transform: translateZ(0);
+    }
+
+    /* card base */
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.01));
+      border: 1px solid var(--glass-border);
+      padding:18px; border-radius:var(--radius); box-shadow: var(--elev);
+      backdrop-filter: blur(8px) saturate(120%); transition: transform var(--speed-mid) cubic-bezier(.2,.9,.2,1), box-shadow var(--speed-mid), opacity var(--speed-fast);
+    }
+    .card:focus-within { box-shadow: 0 28px 80px rgba(124,92,255,0.12); transform: translateY(-4px); }
+
+    input, select, button, textarea {
+      font-family: inherit; border-radius:10px; border:1px solid rgba(255,255,255,0.03);
+      background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.008));
+      color: var(--text); padding:10px 12px; outline:none; min-height:40px;
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.01);
+      transition: transform var(--speed-fast), box-shadow var(--speed-fast), border-color var(--speed-fast), background var(--speed-fast);
+    }
+    input::placeholder, textarea::placeholder { color: rgba(234,244,255,0.45); font-weight:600; }
+    input:focus, textarea:focus, select:focus { transform: translateY(-2px); border-color: rgba(124,92,255,0.9); box-shadow: 0 10px 30px rgba(124,92,255,0.06); }
+
+    /* buttons */
+    .btn {
+      appearance:none; border:none; padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:800;
+      color:#030312; background:linear-gradient(90deg,var(--accent-1), var(--accent-3)); box-shadow: 0 10px 30px rgba(124,92,255,0.12);
+      transition: transform var(--speed-fast), box-shadow var(--speed-fast), filter var(--speed-fast);
+      letter-spacing:0.6px; font-size:13px;
+    }
+    .btn.secondary {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008)); color:var(--text);
+      border:1px solid rgba(255,255,255,0.035); box-shadow:none;
+    }
+    .btn.danger {
+      background: linear-gradient(90deg,#ff6b7a,#ff9472); color:#111; box-shadow: 0 10px 30px rgba(255,107,122,0.10);
+    }
+    .btn:active { transform: translateY(1px) scale(.997); }
+    .btn:hover { transform: translateY(-3px); filter:brightness(1.02); }
+
+    .btn:focus-visible { outline: 3px solid rgba(124,92,255,0.14); outline-offset:4px; }
+
+    .btn.small { padding:8px 10px; font-size:13px; border-radius:10px; }
+
+    /* Login */
+    #loginCard { max-width:520px; margin-bottom:6px; align-self:flex-start; position:relative; overflow:hidden; }
+    #loginCard h2 { margin:0 0 8px 0; color:var(--text); font-size:18px; }
+
+    /* layout */
+    #adminPanel { display:flex; flex-direction:column; gap:16px; }
+
+    .controls { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    .controls > * { flex:1 1 220px; min-width:180px; }
+
+    /* products grid */
+    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:14px; margin-top:12px; }
+    .product {
+      display:flex; flex-direction:column; gap:10px; padding:14px; border-radius:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));
+      border:1px solid rgba(255,255,255,0.03); transition: transform .32s cubic-bezier(.2,.9,.2,1), box-shadow .32s, opacity .18s;
+      position:relative; overflow:hidden; transform-origin:center; will-change:transform, box-shadow, opacity;
+      opacity:0; animation: enterUp .42s cubic-bezier(.2,.9,.2,1) forwards;
+    }
+    /* staggered entrance via CSS variable (set in JS optionally) or nth-child fallback */
+    .grid > .product:nth-child(1) { animation-delay: 0ms; }
+    .grid > .product:nth-child(2) { animation-delay: 40ms; }
+    .grid > .product:nth-child(3) { animation-delay: 80ms; }
+    .grid > .product:nth-child(4) { animation-delay: 120ms; }
+    .grid > .product:nth-child(5) { animation-delay: 160ms; }
+    .grid > .product:nth-child(6) { animation-delay: 200ms; }
+    @keyframes enterUp {
+      from { opacity:0; transform: translateY(12px) scale(.995); }
+      to { opacity:1; transform:none; }
+    }
+
+    .product:hover { transform: translateY(-10px) scale(1.008); box-shadow: 0 30px 70px rgba(2,6,23,0.7); }
+
+    .thumb {
+      height:150px; border-radius:10px; overflow:hidden; display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(135deg, rgba(124,92,255,0.06), rgba(0,224,161,0.02));
+      border:1px solid rgba(255,255,255,0.02); position:relative; isolation:isolate;
+    }
+    /* shimmer placeholder for images */
+    .thumb::after {
+      content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.035) 50%, rgba(255,255,255,0.02) 100%); transform: translateX(-110%); pointer-events:none;
+      animation: shimmer 1.6s linear infinite;
+      opacity:0.7;
+    }
+    .thumb img { width:100%; height:100%; object-fit:cover; display:block; transform-origin:center; transition: transform .9s cubic-bezier(.2,.9,.2,1), filter .32s; }
+    .product:hover .thumb img { transform: scale(1.06) rotate(-1deg); filter:contrast(1.02) saturate(1.05); }
+    @keyframes shimmer { to { transform: translateX(110%); } }
+
+    .thumb.loaded::after { opacity:0; transform:none; animation:none; transition: opacity .22s ease; }
+
+    .meta { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .title { font-weight:800; font-size:15px; color:var(--text); letter-spacing:0.2px; }
+    .price { font-weight:800; color:var(--accent-2); background: linear-gradient(90deg, rgba(0,224,161,0.06), rgba(124,92,255,0.03)); padding:6px 10px; border-radius:10px; font-size:13px; }
+
+    .inline-edit { display:flex; gap:8px; align-items:center; margin-top:6px; }
+    .inline-edit input { flex:1; padding:8px; background:transparent; border:1px solid rgba(255,255,255,0.03); color:var(--muted); font-weight:700; border-radius:10px; }
+
+    .actions { display:flex; gap:8px; margin-top:6px; }
+
+    /* modal/backdrop upgrades */
+    .modal-backdrop {
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background: radial-gradient(900px 400px at 50% 20%, rgba(124,92,255,0.06), transparent), linear-gradient(180deg, rgba(2,4,10,0.65), rgba(2,4,10,0.9));
+      z-index:1200; animation: backdropIn .26s ease forwards;
+      backdrop-filter: blur(6px) saturate(120%);
+    }
+    .modal {
+      width:100%; max-width:880px; border-radius:16px; padding:22px; background: linear-gradient(180deg,#0e1014,#0b0c10);
+      border:1px solid rgba(255,255,255,0.03); box-shadow: 0 40px 120px rgba(2,6,23,0.9);
+      transform: translateY(24px) scale(.98); opacity:0; animation: modalIn .34s cubic-bezier(.2,.9,.2,1) forwards;
+      display:grid; grid-template-columns: 1fr 360px; gap:18px;
+    }
+    @keyframes modalIn { to { transform:none; opacity:1; } }
+    @keyframes backdropIn { from { opacity:0 } to { opacity:1 } }
+
+    .modal .preview { border-radius:12px; overflow:hidden; position:relative; border:1px solid rgba(255,255,255,0.02); display:flex; flex-direction:column; height:100%; background:linear-gradient(180deg, rgba(255,255,255,0.006), rgba(255,255,255,0.002)); }
+    .modal .preview img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .8s cubic-bezier(.2,.9,.2,1); }
+
+    .modal-footer { display:flex; gap:8px; width:100%; align-items:center; justify-content:flex-end; margin-top:6px; }
+
+    /* accent bar and subtle glow lines */
+    .accent-bar { height:5px; border-radius:999px; background: linear-gradient(90deg,var(--accent-1),var(--accent-2)); box-shadow: 0 12px 36px rgba(124,92,255,0.10); margin-bottom:12px; }
+
+    /* testimonials */
+    .testi-grid { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+    .testi { display:flex; gap:12px; align-items:flex-start; padding:12px; border-radius:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.008), rgba(255,255,255,0.004));
+      border:1px solid rgba(255,255,255,0.03); transition: transform .24s, box-shadow .24s;
+      transform-origin:center;
+    }
+    .testi:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(2,6,23,0.65); }
+    .testi .avatar { width:64px; height:64px; border-radius:12px; overflow:hidden; flex:0 0 64px; }
+    .testi .avatar img { width:100%; height:100%; object-fit:cover; display:block; filter:drop-shadow(0 6px 18px rgba(0,0,0,0.6)); transition: transform .6s; }
+    .testi .body { flex:1; }
+
+    /* micro animations */
+    .pulse { animation: pulseGlow 1s ease; }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 6px 20px rgba(124,92,255,0.06); transform:translateY(0) }
+      50% { box-shadow: 0 18px 40px rgba(124,92,255,0.12); transform:translateY(-6px) }
+      100% { box-shadow: 0 6px 20px rgba(124,92,255,0.06); transform:translateY(0) }
+    }
+
+    /* tiny helpers + responsive */
+    .row { display:flex; gap:8px; align-items:center; }
+    footer { margin-top:auto; display:flex; gap:12px; align-items:center; justify-content:space-between; color:var(--muted); font-size:13px; padding:14px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.008), rgba(255,255,255,0.004)); border:1px solid rgba(255,255,255,0.02); }
+
+    @media (max-width:980px) {
+      .modal { grid-template-columns: 1fr; max-width:92vw; padding:16px; }
+      .thumb { height:160px }
+      .logo { width:44px; height:44px; }
+      header { gap:8px; }
+    }
+
+    /* accessibility: focus ring fallback and keyboard affordances */
+    :focus { outline: none; }
+    :focus-visible { outline: 3px solid rgba(124,92,255,0.12); outline-offset:4px; border-radius:10px; }
+
+    /* small polish for text truncation */
+    .muted, .title { word-break: break-word; }
+
+    /* status indicator micro animation */
+    #navStatus { position:relative; padding-left:18px; }
+    #navStatus::before {
+      content:""; width:8px; height:8px; border-radius:50%; position:absolute; left:6px; top:6px;
+      background: linear-gradient(180deg,#54ffcf,#00c18a);
+      box-shadow: 0 6px 18px rgba(0,224,161,0.12);
+      animation: beat 2s infinite;
+    }
+    @keyframes beat { 0%,100% { transform: scale(1); opacity:0.9 } 50% { transform: scale(1.25); opacity:0.6 } }
+
+    /* reduced contrast theme fallback (for very bright monitors) */
+    @media (prefers-contrast: more) {
+      .card { border-color: rgba(255,255,255,0.06); }
+    }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex; align-items:center; gap:12px">
+    <div class="logo">WG</div>
+    <div>
+      <h1>Wonder Gallery — Admin Panel</h1>
+      <div class="subtitle">Black Edition • Ultimate UI + Animated Modal</div>
+    </div>
+  </div>
+
+  <!-- this small user badge can remain visible, but real admin info appears after login -->
+  <div id="userBadge" class="badge auth-only" aria-hidden="true">Signed in as <strong style="margin-left:6px;color:#fff" id="userEmail">Admin</strong></div>
+</header>
+
+<!-- LOGIN (visible pre-login) -->
+<div id="loginCard" class="card">
+  <h2>Admin Sign In</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button id="loginBtn" class="btn">Sign in</button>
+</div>
+
+<!-- NAV (only after login) -->
+<nav class="card auth-only" aria-hidden="true" style="display:flex;gap:12px;align-items:center;">
+  
+  <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+    <div class="muted" id="navStatus">Live • Firestore</div>
+    <button class="btn danger signOutBtn">Sign out</button>
+  </div>
+</nav>
+
+<!-- DASHBOARD (hidden until login) -->
+<div id="adminPanel" class="hidden auth-only">
+
+  <div class="card">
+    <div class="accent-bar"></div>
+    <h2 style="margin:0 0 8px 0">Add New Product</h2>
+    <div class="controls">
+      <input id="newTitle" placeholder="Title">
+      <input id="newDesc" placeholder="Description">
+      <input id="newPrice" type="number" placeholder="Price">
+      <select id="newType">
+        <option value="piece">Piece</option>
+        <option value="package">Package</option>
+        <option value="custom">Custom</option>
+      </select>
+      <input id="newImage" placeholder="Image URL (PNG/JPG)">
+      <button id="addProduct" class="btn">Add Product</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 8px 0">Products</h2>
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;">
+      <input id="search" placeholder="Search by name…" />
+      <div class="muted">Live sync with Firestore • Animated grid</div>
+    </div>
+
+    <div id="products" class="grid"></div>
+  </div>
+
+  <!-- Testimonials management -->
+  <div class="card">
+    <h2 style="margin:0 0 8px 0">Testimonials</h2>
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+      <input id="newTestName" placeholder="Name" style="flex:1 1 160px;">
+      <input id="newTestAvatar" placeholder="Avatar URL (optional)" style="flex:1 1 240px;">
+      <input id="newTestOrder" type="number" placeholder="Order" style="width:100px;">
+      <label style="display:flex; align-items:center; gap:8px;">
+        <input id="newTestVisible" type="checkbox" checked> Visible
+      </label>
+      <button id="addTestimonial" class="btn">Add Testimonial</button>
+    </div>
+
+    <div style="margin-top:10px;">
+      <textarea id="newTestText" placeholder="Testimonial text…" rows="3" style="width:100%;"></textarea>
+    </div>
+
+    <div id="testimonialsList" class="testi-grid" aria-live="polite"></div>
+  </div>
+
+</div>
+
+<!-- EDIT MODAL (used for products) -->
+<div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div>
+      <h3 id="modalTitle">Edit product</h3>
+      <div class="muted" id="modalCreated">Created: —</div>
+
+      <div style="height:12px"></div>
+
+      <div class="field">
+        <label>Title</label>
+        <input id="modalTitleInput" placeholder="Title">
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="modalDescInput" rows="3" placeholder="Description"></textarea>
+      </div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label>Price</label>
+          <input id="modalPriceInput" type="number" placeholder="Price">
+        </div>
+        <div style="width:140px">
+          <label>Type</label>
+          <select id="modalTypeInput">
+            <option value="piece">Piece</option>
+            <option value="package">Package</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Image URL (PNG/JPG)</label>
+        <input id="modalImageInput" placeholder="https://...image.png">
+      </div>
+
+      <div class="field">
+        <label>Batch (optional)</label>
+        <input id="modalBatchInput" placeholder="Batch id / code">
+      </div>
+
+      <div class="modal-footer">
+        <button id="modalDelete" class="btn danger">Delete product</button>
+        <button id="modalClose" class="btn secondary">Cancel</button>
+        <button id="modalSave" class="btn">Save changes</button>
+      </div>
+
+    </div>
+
+    <div class="preview">
+      <div style="padding:12px; display:flex; flex-direction:column; height:100%;">
+        <div style="flex:1; border-radius:10px; overflow:hidden;">
+          <img id="modalPreviewImg" src="" alt="product preview" style="width:100%; height:100%; object-fit:cover; display:block">
+        </div>
+
+        <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div id="modalPreviewTitle" style="font-weight:800; color:#fff"></div>
+            <div class="muted" id="modalPreviewType">Type</div>
+          </div>
+          <div style="text-align:right">
+            <div class="price" id="modalPreviewPrice">$0</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="auth-only card" aria-hidden="true">
+  <div>Wonder Gallery © <span id="year"></span> — Built with ❤️</div>
+  <div class="muted">Version 1.1 • Black Edition</div>
+</footer>
+
+<script type="module">
+/* Final admin HTML + JS:
+   - improved CSS (animations & polish)
+   - fixed module-scope element binding issues
+   - replaced duplicate IDs for sign out buttons and wired them by class
+   - shimmer removal on image load
+   Safe to paste as a single file. */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from
+"https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, onSnapshot,
+  updateDoc, doc, deleteDoc, query, orderBy
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAAxd5YMkan5xfiIoR8yGOhVg168ZZoFqY",
+  authDomain: "wonder-collection.firebaseapp.com",
+  projectId: "wonder-collection",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ---------- explicit element bindings (required in module scope) ---------- */
+const loginCard = document.getElementById("loginCard");
+const adminPanel = document.getElementById("adminPanel");
+const productsEl = document.getElementById("products");
+
+const loginBtn = document.getElementById("loginBtn");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+
+const addProduct = document.getElementById("addProduct");
+const newTitle = document.getElementById("newTitle");
+const newDesc = document.getElementById("newDesc");
+const newPrice = document.getElementById("newPrice");
+const newType = document.getElementById("newType");
+const newImage = document.getElementById("newImage");
+
+const search = document.getElementById("search");
+
+const modalBackdrop = document.getElementById("modalBackdrop");
+const modalTitleInput = document.getElementById("modalTitleInput");
+const modalDescInput = document.getElementById("modalDescInput");
+const modalPriceInput = document.getElementById("modalPriceInput");
+const modalTypeInput = document.getElementById("modalTypeInput");
+const modalImageInput = document.getElementById("modalImageInput");
+const modalBatchInput = document.getElementById("modalBatchInput");
+const modalPreviewImg = document.getElementById("modalPreviewImg");
+const modalPreviewTitle = document.getElementById("modalPreviewTitle");
+const modalPreviewType = document.getElementById("modalPreviewType");
+const modalPreviewPrice = document.getElementById("modalPreviewPrice");
+const modalCreated = document.getElementById("modalCreated");
+
+const modalCloseBtn = document.getElementById("modalClose");
+const modalSaveBtn = document.getElementById("modalSave");
+const modalDeleteBtn = document.getElementById("modalDelete");
+
+const userBadge = document.getElementById("userBadge");
+const userEmailEl = document.getElementById("userEmail");
+const navStatus = document.getElementById("navStatus");
+const footer = document.querySelector("footer");
+const yearEl = document.getElementById("year");
+yearEl.textContent = new Date().getFullYear();
+
+/* Testimonials elements */
+const addTestimonialBtn = document.getElementById("addTestimonial");
+const testimonialsList = document.getElementById("testimonialsList");
+const newTestName = document.getElementById("newTestName");
+const newTestAvatar = document.getElementById("newTestAvatar");
+const newTestText = document.getElementById("newTestText");
+const newTestOrder = document.getElementById("newTestOrder");
+const newTestVisible = document.getElementById("newTestVisible");
+
+/* ---------- helpers & state ---------- */
+let currentEditingId = null;
+let testimonialsUnsub = null;
+
+function setAuthVisibility(visible) {
+  document.querySelectorAll(".auth-only").forEach(el => {
+    if (visible) {
+      el.style.display = ""; // allow CSS to control layout
+      el.setAttribute("aria-hidden","false");
+    } else {
+      el.style.display = "none";
+      el.setAttribute("aria-hidden","true");
+    }
+  });
+}
+
+/* ---------- auth wiring ---------- */
+// sign in
+loginBtn.addEventListener("click", () => {
+  signInWithEmailAndPassword(auth, email.value, password.value)
+    .catch(e => alert(e.message));
+});
+
+// sign out: attach to every signOutBtn button (we used class to avoid duplicate id issues)
+document.querySelectorAll(".signOutBtn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    signOut(auth).catch(e => alert("Sign out failed: " + e.message));
+  });
+});
+
+// auth state changes
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    loginCard.classList.remove("hidden");
+    adminPanel.classList.add("hidden");
+    setAuthVisibility(false);
+    userBadge.style.display = "none";
+    return;
+  }
+
+  // check admin claim
+  try {
+    const token = await user.getIdTokenResult();
+    if (!token.claims.admin) {
+      alert("Not admin ❌");
+      auth.signOut();
+      return;
+    }
+  } catch (e) {
+    console.error("Token fetch failed:", e);
+    alert("Failed to verify user. Signing out.");
+    auth.signOut();
+    return;
+  }
+
+  // show admin UI
+  loginCard.classList.add("hidden");
+  adminPanel.classList.remove("hidden");
+  setAuthVisibility(true);
+  userEmailEl.textContent = user.email || "Admin";
+  userBadge.style.display = "";
+
+  navStatus.textContent = "Live • Firestore (synced)";
+
+  loadProducts();
+  loadTestimonials();
+});
+
+/* ---------- products CRUD & UI ---------- */
+addProduct.addEventListener("click", async () => {
+  try {
+    await addDoc(collection(db, "products"), {
+      title: newTitle.value || "Untitled",
+      desc: newDesc.value || "",
+      price: Number(newPrice.value) || 0,
+      type: newType.value || "piece",
+      image: newImage.value || "",
+      createdAt: Date.now()
+    });
+    alert("Product added ✅");
+    newTitle.value = ""; newDesc.value = ""; newPrice.value = ""; newImage.value = "";
+  } catch (e) {
+    alert("Failed to add product: " + e.message);
+  }
+});
+
+function createProductElement(d, p) {
+  const el = document.createElement("div");
+  el.className = "product";
+
+  const imgSrc = p.image || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23111214'/><text x='50%' y='50%' fill='%237c5cff' font-size='20' font-family='Arial' text-anchor='middle' dominant-baseline='middle'>No Image</text></svg>";
+
+  el.innerHTML = `
+    <div class="thumb"><img src="${imgSrc}" alt="${escapeHtml(p.title || 'Product image')}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;400&quot; height=&quot;300&quot;><rect width=&quot;100%&quot; height=&quot;100%&quot; fill=%230b0c10/><text x=&quot;50%&quot; y=&quot;50%&quot; fill=%237c5cff font-size=&quot;18&quot; font-family=&quot;Arial&quot; text-anchor=&quot;middle&quot; dominant-baseline=&quot;middle&quot;>Image failed</text></svg>'"></div>
+
+    <div class="meta">
+      <div>
+        <div class="title">${escapeHtml(p.title || "Untitled")}</div>
+        <div class="muted" style="font-size:12px">${escapeHtml((p.desc || "").slice(0,80))}</div>
+      </div>
+      <div class="price">$${Number(p.price||0).toFixed(2)}</div>
+    </div>
+
+    <div class="inline-edit">
+      <input class="inline-title" value="${escapeHtml(p.title || "")}">
+      <input class="inline-price" value="${escapeHtml(String(p.price || ""))}">
+    </div>
+
+    <div class="actions">
+      <button class="btn saveBtn">Save</button>
+      <button class="btn secondary editBtn">Edit</button>
+      <button class="btn danger deleteBtn">Delete</button>
+    </div>
+  `;
+
+  // wire buttons
+  el.querySelector(".saveBtn").onclick = async () => {
+    const newT = el.querySelector(".inline-title").value;
+    const newP = Number(el.querySelector(".inline-price").value || 0);
+    try {
+      await updateDoc(doc(db,"products",d.id), { title: newT, price: newP });
+      el.classList.add("pulse");
+      setTimeout(()=>el.classList.remove("pulse"),900);
+    } catch (e) {
+      alert("Save failed: " + e.message);
+    }
+  };
+
+  el.querySelector(".editBtn").onclick = () => {
+    openModalFor(d.id, p);
+  };
+
+  el.querySelector(".deleteBtn").onclick = async () => {
+    if (!confirm("Delete this product permanently?")) return;
+    try {
+      await deleteDoc(doc(db,"products",d.id));
+    } catch (e) {
+      alert("Delete failed: " + e.message);
+    }
+  };
+
+  // remove shimmer after image loads
+  const thumb = el.querySelector(".thumb");
+  const img = el.querySelector(".thumb img");
+  if (img) {
+    img.addEventListener('load', () => {
+      thumb.classList.add('loaded');
+    }, { once: true });
+    // also ensure the placeholder is hidden if image already cached/complete
+    if (img.complete && img.naturalWidth !== 0) {
+      thumb.classList.add('loaded');
+    }
+  }
+
+  return el;
+}
+
+function loadProducts() {
+  onSnapshot(collection(db, "products"), snap => {
+    productsEl.innerHTML = "";
+    snap.forEach(d => {
+      const p = d.data();
+      const el = createProductElement(d,p);
+      productsEl.appendChild(el);
+    });
+  },
+  err => {
+    console.error("Products snapshot error:", err);
+    navStatus.textContent = "Disconnected";
+  });
+}
+
+function openModalFor(id, p) {
+  currentEditingId = id;
+  modalTitleInput.value = p.title || "";
+  modalDescInput.value = p.desc || "";
+  modalPriceInput.value = p.price || 0;
+  modalTypeInput.value = p.type || "piece";
+  modalImageInput.value = p.image || "";
+  modalBatchInput.value = p.batch || "";
+  modalPreviewImg.src = p.image || "";
+  modalPreviewTitle.textContent = p.title || "Untitled";
+  modalPreviewType.textContent = (p.type || "—").toUpperCase();
+  modalPreviewPrice.textContent = `$${Number(p.price||0).toFixed(2)}`;
+  modalCreated.textContent = p.createdAt ? "Created: " + new Date(p.createdAt).toLocaleString() : "Created: —";
+
+  modalBackdrop.style.display = "flex";
+  modalBackdrop.setAttribute("aria-hidden","false");
+}
+
+function closeModal() {
+  currentEditingId = null;
+  modalBackdrop.style.display = "none";
+  modalBackdrop.setAttribute("aria-hidden","true");
+}
+
+/* modal interactions */
+modalImageInput.addEventListener('input', () => {
+  modalPreviewImg.src = modalImageInput.value || "";
+});
+modalTitleInput.addEventListener('input', () => modalPreviewTitle.textContent = modalTitleInput.value || "Untitled");
+modalTypeInput.addEventListener('change', () => modalPreviewType.textContent = modalTypeInput.value.toUpperCase());
+modalPriceInput.addEventListener('input', () => modalPreviewPrice.textContent = `$${Number(modalPriceInput.value||0).toFixed(2)}`);
+
+modalCloseBtn.addEventListener('click', closeModal);
+
+modalSaveBtn.addEventListener('click', async () => {
+  if (!currentEditingId) return closeModal();
+  const updates = {
+    title: modalTitleInput.value,
+    desc: modalDescInput.value,
+    price: Number(modalPriceInput.value || 0),
+    type: modalTypeInput.value,
+    image: modalImageInput.value || "",
+  };
+  if (modalBatchInput.value) updates.batch = modalBatchInput.value;
+  try {
+    await updateDoc(doc(db,"products",currentEditingId), updates);
+    closeModal();
+  } catch (e) {
+    alert("Save failed: " + e.message);
+  }
+});
+
+modalDeleteBtn.addEventListener('click', async () => {
+  if (!currentEditingId) return;
+  if (!confirm("Are you sure you want to permanently delete this product?")) return;
+  try {
+    await deleteDoc(doc(db,"products",currentEditingId));
+    closeModal();
+  } catch (e) {
+    alert("Delete failed: " + e.message);
+  }
+});
+
+// click outside modal to close
+modalBackdrop.addEventListener('click', (e) => {
+  if (e.target === modalBackdrop) closeModal();
+});
+
+// search filter
+search.addEventListener('input', () => {
+  const q = search.value.toLowerCase();
+  [...productsEl.children].forEach(c => {
+    const title = c.querySelector(".inline-title").value.toLowerCase();
+    c.style.display = title.includes(q) ? "" : "none";
+  });
+});
+
+/* =========================
+   Testimonials: CRUD + live sync
+   ========================= */
+
+addTestimonialBtn.addEventListener('click', async () => {
+  const name = (newTestName.value || "Anonymous").trim();
+  const text = (newTestText.value || "").trim();
+  const avatar = (newTestAvatar.value || "").trim();
+  const order = Number(newTestOrder.value || 0);
+  const visible = !!newTestVisible.checked;
+
+  if (!text) {
+    alert("Testimonial text is required.");
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, "testimonials"), {
+      name, text, avatar, order, visible, createdAt: Date.now()
+    });
+    newTestName.value = "";
+    newTestText.value = "";
+    newTestAvatar.value = "";
+    newTestOrder.value = "";
+    newTestVisible.checked = true;
+    alert("Testimonial added ✅");
+  } catch (e) {
+    alert("Failed to add testimonial: " + e.message);
+  }
+});
+
+function createTestimonialElement(d, t) {
+  const el = document.createElement("div");
+  el.className = "testi";
+
+  const avatarSrc = t.avatar || "https://cdn-icons-png.flaticon.com/512/168/168726.png";
+
+  el.innerHTML = `
+    <div class="avatar"><img src="${avatarSrc}" alt="${escapeHtml(t.name || 'Avatar')}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/168/168726.png'"></div>
+    <div class="body">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-weight:700">${escapeHtml(t.name || "Anonymous")}</div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div class="muted" style="font-size:13px">Order</div>
+          <input type="number" class="test-order" value="${Number(t.order||0)}">
+          <label class="visible-toggle"><input type="checkbox" class="test-visible" ${t.visible ? "checked" : ""}> Visible</label>
+          <button class="btn secondary editTest">Edit</button>
+          <button class="btn danger deleteTest">Delete</button>
+        </div>
+      </div>
+      <div style="margin-top:6px" class="test-text">${escapeHtml(t.text || "")}</div>
+      <div style="margin-top:8px; display:flex; gap:8px;">
+        <input class="inline-name" value="${escapeHtml(t.name || "")}" style="flex:1;">
+        <input class="inline-avatar" value="${escapeHtml(t.avatar || "")}" style="flex:1;">
+        <button class="btn saveTest">Save</button>
+      </div>
+    </div>
+  `;
+
+  // Save inline changes (name/avatar/order/visible/text)
+  el.querySelector(".saveTest").onclick = async () => {
+    const newName = el.querySelector(".inline-name").value;
+    const newAvatar = el.querySelector(".inline-avatar").value;
+    const newOrder = Number(el.querySelector(".test-order").value || 0);
+    const newVisible = !!el.querySelector(".test-visible").checked;
+    let newText = t.text || "";
+    try {
+      newText = prompt("Edit testimonial text:", newText) || newText;
+      await updateDoc(doc(db,"testimonials",d.id), {
+        name: newName, avatar: newAvatar, order: newOrder, visible: newVisible, text: newText
+      });
+      el.classList.add("pulse");
+      setTimeout(()=>el.classList.remove("pulse"),900);
+    } catch (e) {
+      alert("Save failed: " + e.message);
+    }
+  };
+
+  // Edit button: open a prompt-based editor for convenience
+  el.querySelector(".editTest").onclick = async () => {
+    const newText = prompt("Edit testimonial text:", t.text || t.message || "") || (t.text || "");
+    const newName = prompt("Edit name:", t.name || "Anonymous") || (t.name || "");
+    const newAvatar = prompt("Edit avatar URL (or leave):", t.avatar || "") || (t.avatar || "");
+    const newOrder = Number(prompt("Order (number):", String(t.order || 0)) || (t.order || 0));
+    const newVisible = confirm("Should this testimonial be visible? OK = yes");
+
+    try {
+      await updateDoc(doc(db,"testimonials",d.id), {
+        name: newName, avatar: newAvatar, order: newOrder, visible: newVisible, text: newText
+      });
+    } catch (e) {
+      alert("Update failed: " + e.message);
+    }
+  };
+
+  el.querySelector(".deleteTest").onclick = async () => {
+    if (!confirm("Delete testimonial permanently?")) return;
+    try {
+      await deleteDoc(doc(db,"testimonials",d.id));
+    } catch (e) {
+      alert("Delete failed: " + e.message);
+    }
+  };
+
+  return el;
+}
+
+function loadTestimonials() {
+  if (testimonialsUnsub) testimonialsUnsub();
+
+  const q = query(collection(db, "testimonials"), orderBy("order", "asc"));
+  testimonialsUnsub = onSnapshot(q, snap => {
+    testimonialsList.innerHTML = "";
+    const arr = [];
+    snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
+    if (arr.length === 0) {
+      testimonialsList.innerHTML = `<div class="muted">No testimonials yet. Add one using the form above.</div>`;
+      return;
+    }
+    arr.forEach(item => {
+      const el = createTestimonialElement({ id: item.id }, item);
+      testimonialsList.appendChild(el);
+    });
+  }, err => {
+    console.error("Testimonials snapshot error:", err);
+    testimonialsList.innerHTML = `<div class="muted">Failed to load testimonials.</div>`;
+  });
+}
+
+/* tiny helper: escape HTML for safe insertion */
+function escapeHtml(s) {
+  if (s === null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+</script>
+
+</body>
+</html>

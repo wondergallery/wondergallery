@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wonder Gallery — Collection</title>
+  <meta name="description" content="Wonder Gallery — collection of wallboards. Filter by type, price, search, shuffle, infinite scroll and cart. Firestore-ready admin sync." />
+  <link rel="shortcut icon" href="https://copilot.microsoft.com/th/id/BCO.457b528e-16b4-40fc-9359-3c1439449a5c.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;900&family=Material+Symbols+Rounded" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f5fbff;
+      --nav-a:#0077b6;
+      --accent:#00bfff;
+      --accent-2:#2a6dd1;
+      --muted:#e6f7ff;
+      --card-shadow: 0 8px 28px rgba(12, 46, 98, 0.28);
+      --glass: rgba(255,255,255,0.6);
+      --radius:14px;
+      --max-width:1200px;
+      --text:#07233a;
+      --muted-text:#19422d;
+      --slow-load-min:700ms;
+      --slow-load-max:1200ms;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:"Poppins", Arial, sans-serif; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; line-height:1.35;
+    }
+
+    /* NAV */
+    .site-header{
+      position:sticky; top:0; z-index:120;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:10px 16px;
+      background: linear-gradient(90deg,var(--accent),var(--accent-2));
+      box-shadow:0 6px 20px rgba(0,119,182,0.12);
+      border-bottom-left-radius:12px; border-bottom-right-radius:12px;
+    }
+    .brand { color:#fff; font-weight:900; font-size:1.05rem; letter-spacing:.4px; display:flex; align-items:center; gap:.6rem }
+    .brand img{ width:36px; height:36px; border-radius:8px; object-fit:cover }
+
+    .nav-actions{ display:flex; gap:12px; align-items:center }
+    .nav-search { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.08); padding:6px 8px; border-radius:10px; color:#fff; min-width:260px }
+    .nav-search input {
+      border:0; outline:none; background:transparent; color:#fff; width:260px; font-weight:600; padding:6px;
+    }
+    .btn, button{ border:0; background:transparent; color:inherit; cursor:pointer; padding:8px; border-radius:8px; font-weight:700 }
+    .icon-btn{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; background:rgba(255,255,255,0.08); color:#fff }
+
+    /* Page layout */
+    .page {
+      max-width:var(--max-width); margin:28px auto; padding:0 16px;
+    }
+    h1.page-title{ font-size:2.2rem; margin:0 0 8px; color:var(--accent-2); font-weight:900; letter-spacing:-0.5px }
+    .lead { margin:0 0 18px; color:#0b2436 }
+
+    /* Controls */
+    .controls {
+      display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap;
+    }
+    .filters {
+      display:flex; gap:10px; align-items:center; background:linear-gradient(180deg,#fff,var(--muted)); padding:12px; border-radius:12px; box-shadow:var(--card-shadow);
+    }
+    .filter-group { display:flex; gap:8px; align-items:center }
+    .filter-group label { font-weight:700; color:var(--accent-2); font-size:.85rem }
+    .filter-pill {
+      padding:6px 10px; border-radius:999px; background:rgba(42,109,209,0.06); color:var(--accent-2); cursor:pointer; font-weight:700;
+    }
+    .filter-pill.active { background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff; box-shadow:0 8px 22px rgba(42,109,209,0.12) }
+
+    /* Grid */
+    .product-grid {
+      display:grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap:14px;
+    }
+    .product {
+      background:linear-gradient(180deg,#fff,#f2fbff); border-radius:12px; padding:12px; text-align:center; box-shadow:0 8px 26px rgba(0,0,0,0.06); position:relative;
+      transition: transform .16s ease, box-shadow .16s ease;
+    }
+    .product:hover { transform: translateY(-6px); box-shadow:0 18px 40px rgba(42,109,209,0.12) }
+    .product img{ width:100%; height:170px; object-fit:cover; border-radius:8px; margin-bottom:8px }
+    .product h3{ margin:6px 0; font-size:1rem; color:#0077b6 }
+    .product p { margin:4px 0; font-size:.9rem; color:#0b2436 }
+    .price { font-weight:900; color:var(--accent-2); font-size:1.05rem; margin-top:6px }
+    .tag { display:inline-block; padding:4px 8px; border-radius:8px; font-size:.75rem; background:rgba(42,109,209,0.06); color:var(--accent-2); font-weight:700; margin-top:6px }
+
+    .card-actions { display:flex; gap:8px; justify-content:center; margin-top:8px }
+    .btn-primary { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff; padding:8px 12px; border-radius:10px; font-weight:700; text-decoration:none; box-shadow:var(--card-shadow) }
+    .btn-ghost { padding:8px 10px; background:transparent; border-radius:10px; color:var(--accent-2); font-weight:700; text-decoration:none; border:2px solid rgba(42,109,209,0.06) }
+
+    /* Cart drawer */
+    .cart-toggle { position:fixed; right:18px; bottom:18px; z-index:100; background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff; border-radius:999px; width:56px; height:56px; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 36px rgba(42,109,209,0.18); cursor:pointer }
+    .cart-count { position:absolute; top:-6px; right:-6px; background:#ff5e5e; color:#fff; width:22px; height:22px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:900 }
+
+    .cart-drawer { position:fixed; right:0; top:0; height:100%; width:360px; max-width:95%; background:linear-gradient(180deg,#fff,#f2fbff); box-shadow: -18px 0 40px rgba(12,46,98,0.16); transform:translateX(110%); transition:transform .28s cubic-bezier(.2,.9,.2,1); z-index:120; padding:18px; display:flex; flex-direction:column }
+    .cart-drawer.open { transform:translateX(0) }
+    .cart-items { flex:1; overflow:auto; display:flex; flex-direction:column; gap:12px; margin-top:12px }
+    .cart-item { display:flex; gap:10px; align-items:center; background:linear-gradient(180deg,#fff,#f7fcff); padding:8px; border-radius:10px; box-shadow:var(--card-shadow) }
+    .cart-item img{ width:64px; height:64px; object-fit:cover; border-radius:8px }
+    .cart-footer { border-top:1px solid rgba(0,0,0,0.06); padding-top:12px; margin-top:12px; display:flex; justify-content:space-between; align-items:center }
+
+    /* sentinel area for infinite loading */
+    .load-sentinel { text-align:center; padding:18px; color:var(--accent-2) }
+
+    /* skeleton loader */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.06), rgba(0,0,0,0.04));
+      background-size: 200% 100%;
+      animation: shine 1.2s linear infinite;
+      border-radius:10px;
+      width:100%;
+      height:170px;
+    }
+    @keyframes shine { from { background-position: 100% 0 } to { background-position: -100% 0 } }
+
+    /* small screens */
+    @media (max-width:880px){
+      .nav-search input{ width:140px }
+      .product img{ height:150px }
+      .cart-drawer { width:92% }
+      .filters { flex-direction:column; align-items:flex-start }
+    }
+
+    /* reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      * { transition:none !important; animation:none !important; }
+      .skeleton { animation: none; }
+    }
+
+    /* small visual tweaks */
+    .muted { color:var(--muted-text); font-size:.9rem }
+    .controls .small-note { font-size:.9rem; color:#3b536b; margin-left:8px }
+    /* MOBILE NAV FIXES: keep search full-width, allow wrapping and prevent overflow */
+@media (max-width: 720px) {
+  .site-header { padding:10px 12px; }
+
+  /* allow nav actions to wrap and keep spacing */
+  .nav-actions {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    width:100%;
+  }
+
+  /* make search take full available width on small screens */
+  .nav-search {
+    order: 1;
+    flex: 1 1 100%;
+    min-width: 0;               /* IMPORTANT to allow input to shrink */
+    padding:6px 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius:10px;
+  }
+  .nav-search input {
+    width:100%;                 /* fill the nav-search container */
+    min-width:0;
+  }
+  /* position clear button inside the search bar so it won't push layout */
+  .nav-search { position:relative; }
+  #searchClear {
+    position:absolute;
+    right:6px;
+    top:50%;
+    transform:translateY(-50%);
+    display:inline-block;
+    background:transparent;
+    border:0;
+    color:#fff;
+    padding:6px;
+    font-weight:700;
+  }
+
+  /* shrink/hide Explore button so it doesn't force overflow */
+  .btn.btn-primary, .cta-primary {
+    order: 2;
+    flex: 0 0 auto;
+    /* Option A: hide entirely on small screens (uncomment if desired)
+       display:none;
+    */
+    /* Option B: keep but reduce padding/text so it fits */
+    padding:8px 10px;
+    font-size:.95rem;
+  }
+
+  /* move icon buttons to the next line (if many controls exist) */
+  .icon-btn { order: 3; }
+
+  /* brand stays visible but reduce margin if needed */
+  .brand { flex: 0 0 auto; }
+
+  /* make sure marquee and other elements don't underflow */
+  .page { padding-left:12px; padding-right:12px; }
+}
+  </style>
+</head>
+<body>
+  <!-- Header with search -->
+  <header class="site-header" role="banner">
+    <div class="brand">
+      <img src="https://i.postimg.cc/k5WvY28H/G.png" alt="Wonder Gallery logo" />
+      <span>Wonder Gallery</span>
+    </div>
+
+    <div class="nav-actions" aria-hidden="false">
+      <div class="nav-search" role="search" aria-label="Product search">
+        <span class="material-symbols-rounded" aria-hidden="true" style="color:#fff">search</span>
+        <input id="globalSearch" type="search" placeholder="Search wallboards, e.g. sunset" aria-label="Search products">
+        <button id="searchClear" class="btn" title="Clear search" aria-label="Clear search" style="color:#fff; font-weight:700; font-size:.85rem; display:none">Clear</button>
+      </div>
+
+      <button id="shuffleBtn" class="btn icon-btn" title="Shuffle products" aria-label="Shuffle products">
+        <span class="material-symbols-rounded" aria-hidden="true">shuffle</span>
+      </button>
+
+      <a class="btn btn-primary" href="#" id="exploreAll" title="Explore all">Explore</a>
+    </div>
+  </header>
+
+  <main class="page" role="main">
+    <h1 class="page-title">Wallboards Collection</h1>
+    <p class="lead">Browse, filter and collect your favorite wallboards — choose packages, single pieces or request a custom work.</p>
+
+    <section class="controls" aria-label="Collection controls">
+      <div class="filters" role="region" aria-label="Filters">
+        <div class="filter-group" role="group" aria-label="Type filter">
+          <label>Type</label>
+          <button class="filter-pill active" data-type="all">All</button>
+          <button class="filter-pill" data-type="package">Package</button>
+          <button class="filter-pill" data-type="piece">Piece</button>
+          <button class="filter-pill" data-type="custom">Custom</button>
+        </div>
+
+        <div class="filter-group" role="group" aria-label="Price filter">
+          <label>Price</label>
+          <input id="priceMin" type="number" min="0" step="1" placeholder="Min" style="width:84px; padding:6px; border-radius:8px; border:1px solid rgba(0,0,0,0.06)">
+          <input id="priceMax" type="number" min="0" step="1" placeholder="Max" style="width:84px; padding:6px; border-radius:8px; border:1px solid rgba(0,0,0,0.06)">
+        </div>
+
+        <div class="filter-group" role="group" aria-label="Sort">
+          <label>Sort</label>
+          <select id="sortSelect" style="padding:6px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); font-weight:700">
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: Low → High</option>
+            <option value="price-desc">Price: High → Low</option>
+            <option value="newest">Newest</option>
+          </select>
+        </div>
+
+        <div style="margin-left:6px; display:flex; gap:8px; align-items:center">
+          <button id="applyFilters" class="btn btn-ghost">Apply</button>
+          <button id="resetFilters" class="btn" title="Reset filters">Reset</button>
+        </div>
+      </div>
+
+      <div style="margin-left:auto; display:flex; gap:10px; align-items:center">
+        <button id="shuffleVisible" class="btn btn-ghost">Shuffle Visible</button>
+        <button id="resetCatalog" class="btn" title="Reset catalog">Reset Catalog</button>
+      </div>
+    </section>
+
+    <!-- product grid -->
+    <section aria-labelledby="productsHeading">
+      <h2 id="productsHeading" style="display:none">Products</h2>
+
+      <div id="productGrid" class="product-grid" aria-live="polite" aria-atomic="false">
+        <!-- products injected here -->
+      </div>
+
+      <div id="loadSentinel" class="load-sentinel" aria-hidden="false">Loading more products…</div>
+    </section>
+    <!-- hidden live announcer for screen readers -->
+    <div id="collectionAnnouncements" aria-live="polite" aria-atomic="true" style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden"></div>
+  </main>
+
+  <!-- Cart toggle and drawer -->
+  <div id="cartToggle" class="cart-toggle" role="button" aria-label="Open cart" tabindex="0">
+    <span class="material-symbols-rounded" aria-hidden="true">shopping_cart</span>
+    <div id="cartCount" class="cart-count" aria-hidden="false">0</div>
+  </div>
+
+  <aside id="cartDrawer" class="cart-drawer" aria-hidden="true" aria-label="Shopping cart">
+    <div style="display:flex; justify-content:space-between; align-items:center">
+      <strong style="font-size:1.05rem">Your Cart</strong>
+      <button id="closeCart" class="btn" aria-label="Close cart" style="font-weight: bolder;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #3b536b;">Close</button>
+    </div>
+
+    <div id="cartItems" class="cart-items" role="list">
+      <!-- cart items -->
+    </div>
+
+    <div class="cart-footer">
+      <div>
+        <div style="font-weight:700">Total</div>
+        <div id="cartTotal" style="font-weight:900; color:var(--accent-2)">$0</div>
+      </div>
+      <div>
+        <button id="checkoutBtn" class="btn-primary">Checkout</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Firebase (compat) SDKs - optional: only needed if you intend to use Firestore admin features.
+       Replace firebaseConfig with your project details and set TRY_FIRESTORE = true -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+  /* ================================
+     COLLECTION PAGE JS
+     Features:
+      - product pool + optional Firestore-backed catalog (realtime)
+      - filters, search, sorting
+      - randomized "shuffle" rendering like your main page
+      - infinite scroll with slower simulated load (skeletons)
+      - cart persisted locally and optional Firestore sync
+      - admin helper functions to add/delete products in Firestore
+     ================================= */
+
+  /* --------------- Configuration --------------- */
+  const INITIAL_LOAD = 50;
+  const LOAD_MORE_COUNT = 500;
+  // simulated delay range (ms) to avoid "instant load"
+  const LOAD_DELAY_MIN = 800;
+  const LOAD_DELAY_MAX = 1200;
+
+  // Firestore: set your config here then set TRY_FIRESTORE = true to enable
+const firebaseConfig = {
+    apiKey: "AIzaSyAAxd5YMkan5xfiIoR8yGOhVg168ZZoFqY",
+    authDomain: "wonder-collection.firebaseapp.com",
+    projectId: "wonder-collection",
+    storageBucket: "wonder-collection.firebasestorage.app",
+    messagingSenderId: "480185560736",
+    appId: "1:480185560736:web:9ec6ac3767454cf060a3c5",
+    measurementId: "G-QNRX57G91N"
+  };
+  const TRY_FIRESTORE = true; // change to true after filling firebaseConfig
+
+  /* --------------- Product Catalog (local fallback) --------------- */
+  let productPool = [
+  ];
+
+  // working catalog (can be overwritten by Firestore listener)
+  let catalog = [...productPool];
+
+  /* --------------- State --------------- */
+  let displayed = []; // product ids already shown in the grid
+  let currentFilters = { type: 'all', priceMin: null, priceMax: null, q: '', sort: 'featured'};
+  let isFetching = false;
+
+  // cart (persisted locally)
+  let cart = JSON.parse(localStorage.getItem('wg_cart_v1') || '[]');
+
+  /* --------------- DOM refs --------------- */
+  const grid = document.getElementById('productGrid');
+  const sentinel = document.getElementById('loadSentinel');
+  const announcements = document.getElementById('collectionAnnouncements');
+  const cartCountEl = document.getElementById('cartCount');
+  const cartItemsEl = document.getElementById('cartItems');
+  const cartTotalEl = document.getElementById('cartTotal');
+  const cartDrawer = document.getElementById('cartDrawer');
+
+  /* --------------- Utilities --------------- */
+  function randDelay() {
+    return Math.floor(Math.random() * (LOAD_DELAY_MAX - LOAD_DELAY_MIN + 1)) + LOAD_DELAY_MIN;
+  }
+  function shuffle(array) {
+    const a = array.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function announce(text){
+    if(announcements) announcements.textContent = text;
+    setTimeout(()=>{ if(announcements) announcements.textContent=''; }, 1400);
+  }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+  function capitalize(s){ return s && s[0] ? s[0].toUpperCase()+s.slice(1) : s; }
+
+  /* --------------- Rendering Helpers --------------- */
+  function createProductCard(p){
+    const wrapper = document.createElement('article');
+    wrapper.className = 'product';
+    wrapper.setAttribute('data-id', p.id);
+
+    wrapper.innerHTML = ` 
+      <img loading="lazy" src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}">
+      <h3>${escapeHtml(p.title)}</h3>
+      <p class="muted">${escapeHtml(p.desc || '')}</p>
+      <div class="price">$${Number(p.price).toFixed(2)}</div>
+      <div class="tag">${capitalize(p.type)}</div>
+      <div class="card-actions">
+        <button class="btn btn-ghost" data-action="view" aria-label="View ${escapeHtml(p.title)}">View</button>
+        <button class="btn btn-primary" data-action="add" aria-label="Add ${escapeHtml(p.title)} to cart">Add</button>
+      </div>
+    `;
+    wrapper.querySelector('[data-action="add"]').addEventListener('click', ()=> addToCart(p.id));
+    wrapper.querySelector('[data-action="view"]').addEventListener('click', ()=> openProductModal(p));
+    return wrapper;
+  }
+
+  function openProductModal(product){
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(2,10,20,0.5);display:flex;align-items:center;justify-content:center;z-index:200';
+    modal.innerHTML = `<div role="dialog" aria-modal="true" style="background:#fff;border-radius:12px;padding:18px;max-width:740px;width:92%;box-shadow:0 18px 40px rgba(12,46,98,0.16)">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)}" style="width:240px;height:180px;object-fit:cover;border-radius:8px">
+        <div style="flex:1">
+          <h3 style="margin:0">${escapeHtml(product.title)}</h3>
+          <p style="margin:.6rem 0">${escapeHtml(product.desc || '')}</p>
+          <div style="font-weight:900;color:var(--accent-2);font-size:1.1rem">$${Number(product.price).toFixed(2)}</div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button id="modalAdd" class="btn-primary">Add to cart</button>
+            <button id="modalClose" class="btn btn-ghost">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.querySelector('#modalClose').addEventListener('click', ()=> modal.remove());
+    modal.querySelector('#modalAdd').addEventListener('click', ()=> { addToCart(product.id); modal.remove(); });
+    modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.remove(); });
+  }
+
+  /* --------------- Filtering & Sorting --------------- */
+  function applyFilters(list){
+    const c = currentFilters;
+    let out = list.slice();
+
+    // search
+    if(c.q && c.q.trim()){
+      const q = c.q.trim().toLowerCase();
+      out = out.filter(p => (p.title + ' ' + (p.desc || '')).toLowerCase().includes(q));
+    }
+    // type
+    if(c.type && c.type !== 'all'){
+      out = out.filter(p => p.type === c.type);
+    }
+    // price
+    if(typeof c.priceMin === 'number') out = out.filter(p => Number(p.price) >= c.priceMin);
+    if(typeof c.priceMax === 'number') out = out.filter(p => Number(p.price) <= c.priceMax);
+    // sort
+    if(c.sort === 'price-asc') out.sort((a,b)=>a.price-b.price);
+    else if(c.sort === 'price-desc') out.sort((a,b)=>b.price-a.price);
+    else if(c.sort === 'newest') out = shuffle(out);
+    // featured: default order
+
+    return out;
+  }
+
+  /* --------------- Loading & Infinite Scroll --------------- */
+  // initial render (clears grid, shows initial batch)
+  function loadInitial(){
+    grid.innerHTML = '';
+    displayed = [];
+    const filtered = applyFilters(catalog);
+    // show skeletons for perceived load
+    showSkeletons(Math.min(INITIAL_LOAD, filtered.length) || 4);
+    setTimeout(()=> {
+      grid.innerHTML = '';
+      const toShow = filtered.slice(0, INITIAL_LOAD);
+      toShow.forEach(p => {
+        grid.appendChild(createProductCard(p));
+        displayed.push(p.id);
+      });
+      // if fewer than INITIAL_LOAD but there are items, try to fill with shuffled extras
+      if(toShow.length < INITIAL_LOAD && filtered.length > 0){
+        const extras = shuffle(filtered).filter(p=>!displayed.includes(p.id)).slice(0, INITIAL_LOAD - toShow.length);
+        extras.forEach(p => { grid.appendChild(createProductCard(p)); displayed.push(p.id); });
+      }
+      announce(`${Math.min(INITIAL_LOAD, filtered.length)} products loaded.`);
+    }, randDelay());
+  }
+
+  function showSkeletons(count){
+    grid.innerHTML = '';
+    for(let i=0;i<count;i++){
+      const s = document.createElement('div');
+      s.className = 'skeleton';
+      grid.appendChild(s);
+    }
+  }
+
+  // load more for infinite scroll
+  function loadMore(){
+    if(isFetching) return;
+    isFetching = true;
+    // small skeleton row to indicate loading
+    const sentinelText = document.getElementById('loadSentinel');
+    sentinelText.textContent = 'Loading more products…';
+    // add a few skeletons at grid end
+    const skeletons = [];
+    for(let i=0;i<3;i++){
+      const s = document.createElement('div');
+      s.className = 'skeleton';
+      grid.appendChild(s);
+      skeletons.push(s);
+    }
+
+    setTimeout(()=> {
+      // remove skeletons
+      skeletons.forEach(s => s.remove());
+      const filtered = applyFilters(catalog);
+      if(filtered.length === 0){
+        announce('No products match your filters.');
+        sentinelText.textContent = 'No products to show.';
+        isFetching = false;
+        return;
+      }
+      const notShown = filtered.filter(p => !displayed.includes(p.id));
+      let toAdd = [];
+      if(notShown.length === 0){
+        // reuse shuffled so scrolling never stops
+        toAdd = shuffle(filtered).slice(0, LOAD_MORE_COUNT);
+      } else {
+        toAdd = notShown.slice(0, LOAD_MORE_COUNT);
+      }
+      toAdd.forEach(p => {
+        grid.appendChild(createProductCard(p));
+        displayed.push(p.id);
+      });
+      announce(`${toAdd.length} product${toAdd.length===1?'':'s'} loaded.`);
+      isFetching = false;
+    }, randDelay());
+  }
+
+  // IntersectionObserver for sentinel
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting) loadMore();
+    });
+  }, { rootMargin: '400px' });
+
+  /* --------------- Cart (local with optional Firestore sync) --------------- */
+  function persistCart(){
+    localStorage.setItem('wg_cart_v1', JSON.stringify(cart));
+    // optionally: syncCartToFirestore(cart);
+  }
+
+  function syncCartUI(){
+    const totalQty = cart.reduce((s,i)=>s+i.qty, 0);
+    cartCountEl.textContent = totalQty;
+    const total = cart.reduce((s,i)=>s + (i.price * i.qty), 0);
+    cartTotalEl.textContent = `$${total.toFixed(2)}`;
+    cartItemsEl.innerHTML = '';
+    if(cart.length === 0){
+      cartItemsEl.innerHTML = '<div style="color:#666; padding:12px; text-align:center;">Your cart is empty</div>';
+      return;
+    }
+    cart.forEach(item=>{
+      const el = document.createElement('div');
+      el.className = 'cart-item';
+      el.innerHTML = `<div style="background:linear-gradient(180deg,#fff,#f7fcff);display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;box-shadow:var(--card-shadow);width:100%">
+        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}">
+        <div style="flex:1">
+          <div style="font-weight:700">${escapeHtml(item.title)}</div>
+          <div style="color:#4b4b4b;font-size:.88rem">$${Number(item.price).toFixed(2)} × ${item.qty}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn" data-action="inc" aria-label="Increase quantity">+</button>
+          <button class="btn" data-action="dec" aria-label="Decrease quantity">−</button>
+        </div></div>
+      `;
+      el.querySelector('[data-action="inc"]').addEventListener('click', ()=> changeCartQty(item.id, 1));
+      el.querySelector('[data-action="dec"]').addEventListener('click', ()=> changeCartQty(item.id, -1));
+      cartItemsEl.appendChild(el);
+    });
+  }
+
+  function addToCart(productId){
+    const p = catalog.find(x=>x.id===productId) || productPool.find(x=>x.id===productId);
+    if(!p) return;
+    const existing = cart.find(i=>i.id===productId);
+    if(existing){ existing.qty += 1; } else { cart.push({ id: p.id, title: p.title, price: Number(p.price), image: p.image, qty: 1 }); }
+    persistCart();
+    syncCartUI();
+    announce(`${p.title} added to cart.`);
+  }
+
+  function changeCartQty(productId, delta){
+    const idx = cart.findIndex(i=>i.id===productId);
+    if(idx === -1) return;
+    cart[idx].qty += delta;
+    if(cart[idx].qty <= 0) cart.splice(idx, 1);
+    persistCart();
+    syncCartUI();
+  }
+
+  function removeFromCart(productId){
+    const idx = cart.findIndex(i=>i.id===productId);
+    if(idx === -1) return;
+    cart.splice(idx, 1);
+    persistCart();
+    syncCartUI();
+  }
+
+  /* --------------- Firebase (optional) --------------- */
+  let db = null;
+  let productsUnsubscribe = null;
+  let cartsUnsubscribe = null;
+
+  function initFirestore(){
+    if(!TRY_FIRESTORE) return false;
+    if(!firebaseConfig || !firebaseConfig.projectId) { console.warn('Firebase config missing.'); return false; }
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+
+      // listen for 'products' collection changes and update catalog in realtime
+      productsUnsubscribe = db.collection('products').onSnapshot(snapshot=>{
+        const remote = [];
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          // ensure shape
+          remote.push({
+            id: doc.id,
+            title: d.title || d.name || 'Untitled',
+            desc: d.desc || d.description || '',
+            type: (d.type || 'piece').toLowerCase(),
+            price: Number(d.price || 0),
+            image: d.image || '',
+            batch: d.batch || 'standard'
+          });
+        });
+        if(remote.length) {
+          catalog = remote;
+          loadInitial();
+          console.log('Catalog updated from Firestore (products).');
+        }
+      }, err => console.error('products onSnapshot error', err));
+
+      // OPTIONAL: listen to cart documents for this user (admin or user-level implementation)
+      // cartsUnsubscribe = db.collection('carts').doc('demoUser').onSnapshot(...)
+
+      return true;
+    } catch (err) {
+      console.error('Firestore init failed:', err);
+      return false;
+    }
+  }
+
+  // Admin helpers for another admin page to call (examples)
+  function addProductFirestore(product){
+    if(!db) return Promise.reject('Firestore not initialized');
+    // product: { title, desc, type, price, image }
+    return db.collection('products').add(product);
+  }
+  function deleteProductFirestore(docId){
+    if(!db) return Promise.reject('Firestore not initialized');
+    return db.collection('products').doc(docId).delete();
+  }
+
+  /* --------------- UI Wiring --------------- */
+  document.addEventListener('DOMContentLoaded', ()=> {
+    // init Firestore if configured
+    const connected = initFirestore();
+    if(connected) console.log('Connected to Firestore (products listener active).');
+    else console.log('Firestore disabled / not connected. Using local catalog fallback.');
+
+    // initial render with perceived load (skeleton + delay)
+    loadInitial();
+
+    // start observing sentinel for infinite loads
+    io.observe(document.getElementById('loadSentinel'));
+
+    // Filters: type pills
+    document.querySelectorAll('.filter-pill').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilters.type = btn.dataset.type;
+      });
+    });
+
+    // Apply & Reset buttons
+    document.getElementById('applyFilters').addEventListener('click', ()=>{
+      const min = parseFloat(document.getElementById('priceMin').value);
+      const max = parseFloat(document.getElementById('priceMax').value);
+      currentFilters.priceMin = Number.isFinite(min) ? min : null;
+      currentFilters.priceMax = Number.isFinite(max) ? max : null;
+      currentFilters.sort = document.getElementById('sortSelect').value;
+      currentFilters.q = document.getElementById('globalSearch').value || '';
+      loadInitial();
+      announce('Filters applied.');
+    });
+
+    document.getElementById('resetFilters').addEventListener('click', ()=>{
+      document.getElementById('priceMin').value = '';
+      document.getElementById('priceMax').value = '';
+      document.getElementById('sortSelect').value = 'featured';
+      document.getElementById('globalSearch').value = '';
+      document.getElementById('searchClear').style.display = 'none';
+      document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));
+      document.querySelector('.filter-pill[data-type="all"]').classList.add('active');
+      currentFilters = { type: 'all', priceMin: null, priceMax: null, q: '', sort: 'featured' };
+      loadInitial();
+      announce('Filters reset.');
+    });
+
+    // Search with debounce
+    let searchTimer = null;
+    const searchInput = document.getElementById('globalSearch');
+    const searchClear = document.getElementById('searchClear');
+    searchInput.addEventListener('input', (e)=>{
+      const v = e.target.value;
+      searchClear.style.display = v ? 'inline-block' : 'none';
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(()=>{
+        currentFilters.q = v;
+        loadInitial();
+      }, 350);
+    });
+    searchClear.addEventListener('click', ()=>{
+      searchInput.value = '';
+      searchClear.style.display = 'none';
+      currentFilters.q = '';
+      loadInitial();
+    });
+
+    // Shuffle and reset
+    document.getElementById('shuffleBtn').addEventListener('click', ()=>{
+      catalog = shuffle(catalog);
+      loadInitial();
+      announce('Catalog shuffled.');
+    });
+    document.getElementById('shuffleVisible').addEventListener('click', ()=>{
+      const children = Array.from(grid.children);
+      const shuffled = shuffle(children);
+      grid.innerHTML = '';
+      shuffled.forEach(n=>grid.appendChild(n));
+      announce('Visible products shuffled.');
+    });
+    document.getElementById('resetCatalog').addEventListener('click', ()=>{
+      catalog = [...productPool];
+      loadInitial();
+      announce('Catalog reset.');
+    });
+
+    // Cart drawer toggle
+    document.getElementById('cartToggle').addEventListener('click', toggleCart);
+    document.getElementById('cartToggle').addEventListener('keydown', (e) => { if(e.key==='Enter' || e.key===' ') toggleCart(); });
+    document.getElementById('closeCart').addEventListener('click', closeCart);
+    document.getElementById('checkoutBtn').addEventListener('click', ()=>{
+      window.location.href = "http://127.0.0.1:5500/checkout/index.html";
+    });
+
+    // keyboard arrow navigation for product buttons
+    document.addEventListener('keydown', (e)=>{
+      const focusable = document.querySelectorAll('.product button');
+      if(!focusable.length) return;
+      const active = document.activeElement;
+      const idx = Array.from(focusable).indexOf(active);
+      if(e.key === 'ArrowRight'){ if(idx < focusable.length-1) focusable[idx+1].focus(); }
+      if(e.key === 'ArrowLeft'){ if(idx > 0) focusable[idx-1].focus(); }
+    });
+
+    // load cart from storage
+    syncCartUI();
+  });
+
+  function toggleCart(){
+    const open = cartDrawer.classList.contains('open');
+    if(open) closeCart(); else openCart();
+  }
+  function openCart(){ cartDrawer.classList.add('open'); cartDrawer.setAttribute('aria-hidden','false'); }
+  function closeCart(){ cartDrawer.classList.remove('open'); cartDrawer.setAttribute('aria-hidden','true'); }
+
+  /* --------------- Optional: Admin helpers for external admin page --------------- */
+  // Example usage (on admin page):
+  //  - include same Firebase SDKs and call addProductFirestore({ title, desc, type, price, image })
+  //  - use deleteProductFirestore(docId) to remove
+  // These functions are already defined above and will only work when TRY_FIRESTORE=true and firebaseConfig set.
+
+  /* --------------- Cleanup --------------- */
+  window.addEventListener('beforeunload', ()=>{
+    if(productsUnsubscribe) productsUnsubscribe();
+    if(cartsUnsubscribe) cartsUnsubscribe();
+  });
+
+  </script>
+</body>
+</html>
